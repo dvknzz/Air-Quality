@@ -4,7 +4,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌬️ Air Quality Monitor - HCMC</title>
+    <title>🌬️ Air Quality Monitor - ML Dashboard</title>
     
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -23,10 +23,51 @@
         body {
             background: #111827;
             color: #f1f5f9;
-            font-family: 'Inter', 'Segoe UI', sans-serif; /* hiện đại */
+            font-family: 'Inter', 'Segoe UI', sans-serif;
             font-size: 15px;
         }
-        
+        /*Gauge*/
+        /* Định nghĩa màu sắc chuẩn */
+        :root {
+            /* Giữ nguyên các biến cũ của bạn và thêm các biến màu này */
+            --c-good: #4ade80;
+            --c-mod: #facc15;
+            --c-poor: #fb923c;
+            --c-bad: #f87171;
+            --c-haz: #a78bfa;
+        }
+
+        /* Layout cho view Gauges */
+        #gaugesView {
+            display: none;
+            padding: 20px;
+            grid-template-rows: 1fr 1fr 0.8fr;
+            overflow-y: auto;
+        }
+        #gaugesView.active {
+            display: block;
+        }
+
+
+        /* Style cho từng đồng hồ */
+        .gauge-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; height: 100%; }
+        .gauge-container { 
+            position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.02); border-radius: 12px; padding: 10px;
+        }
+        .gauge-canvas-box { position: relative; width: 100%; height: 120px; display: flex; justify-content: center; }
+        .gauge-value {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            font-size: 2em; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .gauge-label { font-size: 1.1em; color: #cbd5e1; margin-bottom: 5px; font-weight: 600; }
+        .gauge-unit { font-size: 0.8em; color: #64748b; margin-top: -15px; }
+
+        /* Style cho bảng chú thích */
+        .legend-table { width: 100%; border-collapse: collapse; font-size: 0.95em; text-align: center; }
+        .legend-table th, .legend-table td { padding: 8px; border: 1px solid rgba(255,255,255,0.1); }
+        .legend-table th { background: rgba(255,255,255,0.05); color: #94a3b8; }
+
         /* ============ HEADER ============ */
         .header {
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
@@ -101,6 +142,26 @@
         .refresh-btn:hover {
             background: rgba(255,255,255,0.3);
         }
+
+        /* ML Status Badge */
+        .ml-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            background: rgba(168,85,247,0.3);
+            border-radius: 20px;
+            font-size: 0.85em;
+        }
+        .ml-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        .ml-dot.on { background: #22c55e; }
+        .ml-dot.off { background: #ef4444; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         
         /* ============ ALERT BAR ============ */
         .alert-bar {
@@ -110,24 +171,19 @@
             font-weight: bold;
             letter-spacing: 0.5px;
             padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
-        .alert-icon {
-            font-size: 1.4em;
-        }
-        .alert-suggestion {
-            font-size: 0.9em;
-            font-style: italic;
-        }
+        .alert-icon { font-size: 1.4em; }
+        .alert-text { flex: 1; }
+        .alert-suggestion { font-size: 0.9em; font-style: italic; opacity: 0.9; }
         
         .alert-bar.good { background: linear-gradient(90deg, #00E400, #00c400); color: #000; }
         .alert-bar.moderate { background: linear-gradient(90deg, #FFFF00, #e6e600); color: #000; }
         .alert-bar.unhealthy-sensitive { background: linear-gradient(90deg, #FF7E00, #e67300); color: #fff; }
         .alert-bar.unhealthy { background: linear-gradient(90deg, #FF0000, #cc0000); color: #fff; }
         .alert-bar.hazardous { background: linear-gradient(90deg, #8F3F97, #7a3580); color: #fff; }
-        
-        .alert-icon { font-size: 1.3em; }
-        .alert-text { flex: 1; }
-        .alert-suggestion { font-size: 0.9em; opacity: 0.9; }
         
         /* ============ DASHBOARD VIEW ============ */
         .dashboard-view {
@@ -164,16 +220,8 @@
             margin-bottom: 15px;
         }
         
-        .node-name {
-            font-size: 1.1em;
-            font-weight: 600;
-        }
-        
-        .node-location {
-            font-size: 0.8em;
-            color: #888;
-            margin-top: 3px;
-        }
+        .node-name { font-size: 1.1em; font-weight: 600; }
+        .node-location { font-size: 0.8em; color: #888; margin-top: 3px; }
         
         .aqi-badge {
             font-size: 2em;
@@ -211,27 +259,11 @@
             text-align: center;
             transition: 0.2s;
         }
+        .metric-item:hover { background: #334155; }
         
-        .metric-label {
-            color: #94a3b8;
-            font-size: 0.8em;
-            margin-bottom: 4px;
-        }
-        .metric-item:hover {
-            background: #334155;
-        }
-
-        .metric-value {
-            font-size: 1.6em;
-            font-weight: 700;
-            color: #38bdf8;  /* Màu xanh cyan đẹp */
-
-        }
-        
-        .metric-unit {
-            font-size: 0.7em;
-            color: #666;
-        }
+        .metric-label { color: #94a3b8; font-size: 0.8em; margin-bottom: 4px; }
+        .metric-value { font-size: 1.6em; font-weight: 700; color: #38bdf8; }
+        .metric-unit { font-size: 0.7em; color: #666; }
         
         .metric-badge {
             font-size: 0.6em;
@@ -239,9 +271,21 @@
             border-radius: 4px;
             margin-left: 5px;
         }
-        
         .metric-badge.qcvn { background: #4CAF50; }
         .metric-badge.who { background: #2196F3; }
+        
+        /* Anomaly Badge on Node Card */
+        .anomaly-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            margin-top: 12px;
+        }
+        .anomaly-indicator.normal { background: rgba(34,197,94,0.15); color: #22c55e; }
+        .anomaly-indicator.warning { background: rgba(239,68,68,0.15); color: #ef4444; }
         
         /* Comparison Section */
         .comparison-section {
@@ -283,10 +327,7 @@
             font-size: 0.85em;
         }
         
-        .time-tab.active {
-            background: #2196F3;
-            border-color: #2196F3;
-        }
+        .time-tab.active { background: #2196F3; border-color: #2196F3; }
         
         /* Suggestions */
         .suggestions-section {
@@ -310,10 +351,7 @@
             gap: 10px;
         }
         
-        .suggestion-list {
-            list-style: none;
-        }
-        
+        .suggestion-list { list-style: none; }
         .suggestion-list li {
             padding: 10px 0;
             border-bottom: 1px solid rgba(255,255,255,0.05);
@@ -321,10 +359,82 @@
             align-items: center;
             gap: 10px;
         }
+        .suggestion-list li:last-child { border-bottom: none; }
         
-        .suggestion-list li:last-child {
-            border-bottom: none;
+        /* ML Panel */
+        .ml-panel {
+            border: 1px solid rgba(168,85,247,0.3);
+            background: linear-gradient(145deg, #1a1a2e 0%, #1e1e3f 100%);
         }
+        .ml-model-item {
+            background: rgba(255,255,255,0.03);
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+        .ml-model-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .ml-status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+        .ml-status-badge.trained { background: rgba(34,197,94,0.2); color: #22c55e; }
+        .ml-status-badge.fallback { background: rgba(234,179,8,0.2); color: #eab308; }
+        .ml-stats { font-size: 0.85em; color: #94a3b8; }
+        
+        /* ============ ML PREDICTION VIEW ============ */
+        .prediction-view {
+            padding: 20px;
+            display: none;
+        }
+        .prediction-view.active { display: block; }
+        
+        .prediction-cards {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 10px 0;
+            margin-bottom: 20px;
+        }
+        .pred-card {
+            min-width: 90px;
+            padding: 14px;
+            background: linear-gradient(145deg, #1f2937, #111827);
+            border-radius: 12px;
+            text-align: center;
+            flex-shrink: 0;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .pred-time { font-size: 0.85em; color: #94a3b8; margin-bottom: 8px; }
+        .pred-value { font-size: 1.4em; font-weight: bold; margin-bottom: 6px; }
+        .pred-aqi {
+            font-size: 0.75em;
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+        
+        .pred-summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .pred-summary-item {
+            background: linear-gradient(145deg, #1f2937, #111827);
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .pred-summary-label { font-size: 0.85em; color: #94a3b8; margin-bottom: 6px; }
+        .pred-summary-value { font-size: 1.5em; font-weight: bold; }
         
         /* ============ HEATMAP VIEW ============ */
         .heatmap-view {
@@ -335,10 +445,7 @@
         
         .heatmap-view.active { display: block; }
         
-        #map {
-            width: 100%;
-            height: 100%;
-        }
+        #map { width: 100%; height: 100%; }
         
         /* Map Sidebar */
         .map-sidebar {
@@ -375,11 +482,7 @@
             transition: all 0.3s;
             border-left: 4px solid transparent;
         }
-        
-        .map-node-card:hover {
-            background: rgba(255,255,255,0.1);
-        }
-        
+        .map-node-card:hover { background: rgba(255,255,255,0.1); }
         .map-node-card.good { border-left-color: #00E400; }
         .map-node-card.moderate { border-left-color: #FFFF00; }
         .map-node-card.unhealthy-sensitive { border-left-color: #FF7E00; }
@@ -397,28 +500,10 @@
             z-index: 500;
         }
         
-        .legend-title {
-            font-size: 0.85em;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-        
-        .legend-items {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .legend-item {
-            text-align: center;
-            font-size: 0.7em;
-        }
-        
-        .legend-color {
-            width: 35px;
-            height: 15px;
-            border-radius: 3px;
-            margin-bottom: 3px;
-        }
+        .legend-title { font-size: 0.85em; margin-bottom: 10px; font-weight: 600; }
+        .legend-items { display: flex; gap: 8px; }
+        .legend-item { text-align: center; font-size: 0.7em; }
+        .legend-color { width: 35px; height: 15px; border-radius: 3px; margin-bottom: 3px; }
         
         /* Map Mini Chart */
         .map-chart-panel {
@@ -433,9 +518,7 @@
             width: 500px;
         }
         
-        .mini-chart-container {
-            height: 120px;
-        }
+        .mini-chart-container { height: 120px; }
         
         /* Custom Marker */
         .aqi-marker {
@@ -458,32 +541,16 @@
             color: white;
             border-radius: 12px;
         }
-        
-        .leaflet-popup-tip {
-            background: rgba(26, 26, 46, 0.95);
-        }
-        
-        .popup-content {
-            padding: 10px;
-        }
-        
+        .leaflet-popup-tip { background: rgba(26, 26, 46, 0.95); }
+        .popup-content { padding: 10px; }
         .popup-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
         }
-        
-        .popup-title {
-            font-weight: bold;
-        }
-        
-        .popup-aqi {
-            padding: 5px 12px;
-            border-radius: 6px;
-            font-weight: bold;
-        }
-        
+        .popup-title { font-weight: bold; }
+        .popup-aqi { padding: 5px 12px; border-radius: 6px; font-weight: bold; }
         .popup-status {
             padding: 8px;
             border-radius: 6px;
@@ -491,68 +558,50 @@
             margin-bottom: 10px;
             font-size: 0.9em;
         }
-        
-        .popup-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-        }
-        
+        .popup-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
         .popup-item {
             text-align: center;
             padding: 8px;
             background: rgba(255,255,255,0.1);
             border-radius: 6px;
         }
-        
-        .popup-item-label {
-            font-size: 0.7em;
-            opacity: 0.7;
-        }
-        
-        .popup-item-value {
-            font-weight: bold;
-        }
+        .popup-item-label { font-size: 0.7em; opacity: 0.7; }
+        .popup-item-value { font-weight: bold; }
         
         /* Loading */
         .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(17, 24, 39, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
             backdrop-filter: blur(2px);
         }
+        .loading-overlay.hidden { display: none; }
         .spinner {
+            border: 3px solid rgba(255,255,255,0.1);
             border-top-color: #3b82f6;
             width: 45px;
             height: 45px;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
         }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
         
         /* Responsive */
         @media (max-width: 768px) {
-            .header {
-                flex-wrap: wrap;
-                gap: 10px;
-            }
-            
-            .header-center {
-                order: 3;
-                width: 100%;
-                justify-content: center;
-            }
-            
+            .header { flex-wrap: wrap; gap: 10px; }
+            .header-center { order: 3; width: 100%; justify-content: center; }
             .map-sidebar {
-                width: 100%;
-                top: auto;
-                bottom: 0;
-                right: 0;
-                max-height: 40vh;
-                border-radius: 16px 16px 0 0;
+                width: 100%; top: auto; bottom: 0; right: 0;
+                max-height: 40vh; border-radius: 16px 16px 0 0;
             }
-            
-            .map-chart-panel {
-                display: none;
-            }
+            .map-chart-panel { display: none; }
+            .pred-summary { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
 </head>
@@ -560,26 +609,26 @@
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loading">
         <div class="spinner"></div>
+        <div>Đang tải dữ liệu...</div>
     </div>
     
     <!-- Header -->
     <header class="header">
-        <div class="logo">
-            🌬️ Air Quality Monitor
-        </div>
+        <div class="logo">🌬️ Air Quality Monitor</div>
         
         <div class="header-center">
             <button class="view-btn" onclick="resetZoom()" id="btnResetZoom">🔍 Reset Zoom</button>
-            <button class="view-btn active" onclick="switchView('dashboard')" id="btnDashboard">
-                📊 Dashboard
-            </button>
-            <button class="view-btn" onclick="switchView('heatmap')" id="btnHeatmap">
-                🗺️ Bản đồ
-            </button>
-            
+            <button class="view-btn active" onclick="switchView('dashboard')" id="btnDashboard">📊 Dashboard</button>
+            <button class="view-btn" onclick="switchView('gauges')" id="btnGauges">🚀 Chỉ số (Gauges)</button>
+            <button class="view-btn" onclick="switchView('prediction')" id="btnPrediction">🔮 ML Prediction</button>
+            <button class="view-btn" onclick="switchView('heatmap')" id="btnHeatmap">🗺️ Bản đồ</button>
         </div>
         
         <div class="header-right">
+            <div class="ml-badge">
+                <div class="ml-dot" id="mlDot"></div>
+                <span id="mlStatus">ML: --</span>
+            </div>
             <span class="last-update" id="lastUpdate">🕐 --:--</span>
             <button class="refresh-btn" onclick="refreshData()">🔄 Làm mới</button>
         </div>
@@ -590,26 +639,171 @@
         <span class="alert-icon">⚠️</span>
         <span class="alert-text" id="alertText">Đang tải dữ liệu...</span>
         <span class="alert-suggestion" id="alertSuggestion"></span>
-    </div>
+    </div> 
+    <!-- Gauges View -->
+    <div class="gauges-view" id="gaugesView">
+        <div class="card">
+            <div class="card-title">📍 Node 1 - Phú Nhuận (Gauges)</div>
+            <div class="gauge-row">
+                <div class="gauge-container">
+                    <div class="gauge-label">PM2.5</div>
+                    <div class="gauge-canvas-box">
+                        <canvas id="g_n1_pm25"></canvas>
+                        <div class="gauge-value" id="v_n1_pm25">--</div>
+                    </div>
+                    <div class="gauge-unit">µg/m³</div>
+                </div>
+
+                <div class="gauge-container">
+                    <div class="gauge-label">PM10</div>
+                    <div class="gauge-canvas-box">
+                        <canvas id="g_n1_pm10"></canvas>
+                        <div class="gauge-value" id="v_n1_pm10">--</div>
+                    </div>
+                    <div class="gauge-unit">µg/m³</div>
+                </div>
+
+                <div class="gauge-container">
+                    <div class="gauge-label">AQI</div>
+                    <div class="gauge-canvas-box">
+                        <canvas id="g_n1_aqi"></canvas>
+                        <div class="gauge-value" id="v_n1_aqi">--</div>
+                    </div>
+                    <div class="gauge-unit">VN AQI</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📍 Node 2 - Quận 2 (Gauges)</div>
+            <div class="gauge-row">
+                <div class="gauge-container">
+                    <div class="gauge-label">PM2.5</div>
+                    <div class="gauge-canvas-box"><canvas id="g_n2_pm25"></canvas><div class="gauge-value" id="v_n2_pm25">--</div></div>
+                    <div class="gauge-unit">µg/m³</div>
+                </div>
+                <div class="gauge-container">
+                    <div class="gauge-label">PM10</div>
+                    <div class="gauge-canvas-box"><canvas id="g_n2_pm10"></canvas><div class="gauge-value" id="v_n2_pm10">--</div></div>
+                    <div class="gauge-unit">µg/m³</div>
+                </div>
+                <div class="gauge-container">
+                    <div class="gauge-label">AQI</div>
+                    <div class="gauge-canvas-box"><canvas id="g_n2_aqi"></canvas><div class="gauge-value" id="v_n2_aqi">--</div></div>
+                    <div class="gauge-unit">VN_AQI</div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="card">
+            <div class="card-title">📖 Ngưỡng PM theo QCVN</div>
+            <table class="legend-table">
+                <thead>
+                    <tr>
+                        <th>Chỉ số</th>
+                        <th>Nguồn</th>
+                        <th style="color:#4ade80">Tốt</th>
+                        <th style="color:#facc15">TB</th>
+                        <th style="color:#fb923c">Kém</th>
+                        <th style="color:#ef4444">Xấu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>PM2.5</strong></td>
+                        <td>🟢 QCVN</td>
+                        <td>≤ 25</td>
+                        <td>≤ 50</td>
+                        <td>≤ 80</td>
+                        <td>> 80</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PM10</strong></td>
+                        <td>🟢 QCVN</td>
+                        <td>≤ 50</td>
+                        <td>≤ 100</td>
+                        <td>≤ 150</td>
+                        <td>> 150</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
     
+
+        <div class="card">
+    <div class="card-title">📖 Phân loại AQI – QCVN 05:2023</div>
+    <table class="legend-table">
+        <thead>
+            <tr>
+                <th>Khoảng AQI</th>
+                <th>Tốt</th>
+                <th>Trung bình</th>
+                <th>Kém</th>
+                <th>Xấu</th>
+                <th>Rất xấu</th>
+                <th>Nguy hại</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>AQI</strong></td>
+                <td style="color:#00E400">0 – 50</td>
+                <td style="color:#FFFF00">51 – 100</td>
+                <td style="color:#FF7E00">101 – 150</td>
+                <td style="color:#FF0000">151 – 200</td>
+                <td style="color:#8F3F97">&gt; 201 – 300</td>
+                <td style="color:#7E0023">&gt; 301 – 500</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+    </div>
+
     <!-- Dashboard View -->
     <div class="dashboard-view active" id="dashboardView">
         <!-- Main Stats -->
-        <div class="main-stats" id="mainStats">
-            <!-- Node cards will be inserted here -->
+        <div class="main-stats" id="mainStats"></div>
+        
+
+        <!-- ML Models Panel -->
+        <div class="comparison-section ml-panel" style="margin-bottom: 25px;">
+            <div class="section-title">🤖 ML Models Status</div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                <div class="ml-model-item">
+                    <div class="ml-model-header">
+                        <span>🔮 Predictor (LSTM)</span>
+                        <span class="ml-status-badge" id="predStatus">--</span>
+                    </div>
+                    <div class="ml-stats" id="predStats">Mean: -- | Trend: --</div>
+                </div>
+                <div class="ml-model-item">
+                    <div class="ml-model-header">
+                        <span>🔍 Anomaly Detector</span>
+                        <span class="ml-status-badge" id="detStatus">--</span>
+                    </div>
+                    <div class="ml-stats" id="detStats">Mean: -- | Std: --</div>
+                </div>
+            </div>
         </div>
         
+        
+
+        
+    
         <!-- Comparison Chart -->
         <div class="comparison-section">
-            <div class="section-title">
-                📈 So sánh AQI giữa các khu vực (30 phút gần nhất)
-            </div>
+            <div class="section-title">📈 So sánh AQI giữa các khu vực</div>
             <div class="time-tabs">
-                <button class="time-tab active" onclick="changeTimeRange(1)">1 giờ</button>
-                <button class="time-tab" onclick="changeTimeRange(3)">3 giờ</button>
-                <button class="time-tab" onclick="changeTimeRange(6)">6 giờ</button>
-                <button class="time-tab" onclick="changeTimeRange(12)">12 giờ</button>
-                <button class="time-tab" onclick="changeTimeRange(24)">24 giờ</button>
+                <button class="time-tab active" onclick="changeTimeRange(1, event)">1 giờ</button>
+                <button class="time-tab" onclick="changeTimeRange(3, event)">3 giờ</button>
+                <button class="time-tab" onclick="changeTimeRange(6, event)">6 giờ</button>
+                <button class="time-tab" onclick="changeTimeRange(12, event)">12 giờ</button>
+                <button class="time-tab" onclick="changeTimeRange(24, event)">24 giờ</button>
+                <button class="time-tab" onclick="changeTimeRange(48, event)">48 giờ</button>
+                <button class="time-tab" onclick="changeTimeRange(168, event)">7 ngày</button>
             </div>
             <div class="chart-container">
                 <canvas id="comparisonChart"></canvas>
@@ -618,9 +812,7 @@
         
         <!-- PM Comparison Chart -->
         <div class="comparison-section">
-            <div class="section-title">
-                🌫️ So sánh PM2.5 & PM10 theo thời gian
-            </div>
+            <div class="section-title">🌫️ So sánh PM2.5 & PM10 theo thời gian</div>
             <div class="chart-container">
                 <canvas id="pmChart"></canvas>
             </div>
@@ -628,31 +820,70 @@
         
         <!-- Suggestions -->
         <div class="suggestions-section">
-            <!-- CỘT 1: KHUYẾN CÁO -->
             <div class="suggestion-card">
                 <h3>💡 Khuyến cáo sức khỏe</h3>
                 <ul class="suggestion-list" id="healthSuggestions">
-                <li>⏳ Đang tải...</li>
+                    <li>⏳ Đang tải...</li>
                 </ul>
             </div>
-
-            <!-- CỘT 2: THỐNG KÊ NODE 1 & 2 -->
+            
             <div class="suggestion-card">
                 <h3>📊 Thống kê hôm nay</h3>
                 <ul class="suggestion-list" id="todayStats">
-                <li>⏳ Đang tải...</li>
+                    <li>⏳ Đang tải...</li>
                 </ul>
             </div>
-
-            <!-- CỘT 3: BẢNG XẾP HẠNG AQI -->
+            
             <div class="suggestion-card">
                 <h3 style="display: flex; justify-content: space-between; align-items: center;">
                     🏆 Bảng xếp hạng AQI
-                    <input type="date" id="rankingDate" onchange="updateAQIRanking()" style="background: #1e293b; color: white; border: 1px solid #334155; border-radius: 6px; padding: 4px 8px; font-size: 14px;">
+                    <input type="date" id="rankingDate" onchange="updateAQIRanking()" 
+                           style="background: #1e293b; color: white; border: 1px solid #334155; border-radius: 6px; padding: 4px 8px; font-size: 14px;">
                 </h3>
                 <ul class="suggestion-list" id="aqiRanking">
-                <li>⏳ Đang tải...</li>
+                    <li>⏳ Đang tải...</li>
                 </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ML Prediction View -->
+    <div class="prediction-view" id="predictionView">
+        <div class="comparison-section">
+            <div class="section-title">🔮 Dự báo PM2.5 - 24 giờ tới</div>
+            <div class="pred-summary" id="predSummary">
+                <div class="pred-summary-item">
+                    <div class="pred-summary-label">Model</div>
+                    <div class="pred-summary-value" id="predModel">--</div>
+                </div>
+                <div class="pred-summary-item">
+                    <div class="pred-summary-label">Trung bình</div>
+                    <div class="pred-summary-value" id="predAvg">--</div>
+                </div>
+                <div class="pred-summary-item">
+                    <div class="pred-summary-label">Cao nhất</div>
+                    <div class="pred-summary-value" id="predMax">--</div>
+                </div>
+                <div class="pred-summary-item">
+                    <div class="pred-summary-label">Thấp nhất</div>
+                    <div class="pred-summary-value" id="predMin">--</div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="predictionChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="comparison-section">
+            <div class="section-title">📅 Chi tiết dự báo theo giờ</div>
+            <div class="prediction-cards" id="predictionCards"></div>
+        </div>
+        
+        <div class="comparison-section">
+            <div class="section-title">🔍 Anomaly Detection - Phát hiện bất thường</div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;" id="anomalySummary"></div>
+            <div class="chart-container">
+                <canvas id="anomalyChart"></canvas>
             </div>
         </div>
     </div>
@@ -661,15 +892,11 @@
     <div class="heatmap-view" id="heatmapView">
         <div id="map"></div>
         
-        <!-- Map Sidebar -->
         <div class="map-sidebar">
             <div class="map-sidebar-header">📊 Trạm quan trắc</div>
-            <div class="map-sidebar-content" id="mapNodeList">
-                <!-- Node cards -->
-            </div>
+            <div class="map-sidebar-content" id="mapNodeList"></div>
         </div>
         
-        <!-- Map Legend -->
         <div class="map-legend">
             <div class="legend-title">Chỉ số AQI (QCVN 05:2023)</div>
             <div class="legend-items">
@@ -696,7 +923,6 @@
             </div>
         </div>
         
-        <!-- Map Mini Chart -->
         <div class="map-chart-panel">
             <div class="legend-title">📈 AQI 1 giờ qua</div>
             <div class="mini-chart-container">
@@ -711,7 +937,7 @@
     
     <script>
         // ============ CẤU HÌNH ============
-        const API_BASE_URL = 'https://jackie-keeps-ambient-saint.trycloudflare.com/';
+        const API_BASE_URL = 'https://every-assign-complicated-avi.trycloudflare.com';
         
         const NODES = [
             { id: 'node1', name: 'Node 1 - Phú Nhuận', lat: 10.798203747741315, lng: 106.68344878033395, address: 'Phú Nhuận, TP.HCM' },
@@ -724,19 +950,27 @@
         let heatLayer = null;
         let nodeData = {};
         let historyData = {};
+        let rankingData = {};
+        let mlData = {};
+        let predictionData = null;
+        let anomalyData = null;
         let comparisonChart = null;
         let pmChart = null;
         let miniChart = null;
+        let predictionChart = null;
+        let anomalyChart = null;
         let currentTimeRange = 1;
+        let gaugeInstances = {}; // Lưu trữ các biểu đồ đồng hồ để update
         
         // ============ HÀM TIỆN ÍCH ============
+        
         function getAQIColor(aqi) {
-            if (aqi <= 50) return '#10b981'; // Xanh lá hiện đại
-            if (aqi <= 100) return '#facc15'; // Vàng đậm
-            if (aqi <= 150) return '#f97316'; // Cam
-            if (aqi <= 200) return '#ef4444'; // Đỏ
-            return '#8b5cf6';  // Tím
-            }
+            if (aqi <= 50) return '#10b981';
+            if (aqi <= 100) return '#facc15';
+            if (aqi <= 150) return '#f97316';
+            if (aqi <= 200) return '#ef4444';
+            return '#8b5cf6';
+        }
         
         function getAQIClass(aqi) {
             if (aqi <= 50) return 'good';
@@ -761,16 +995,102 @@
             return '#FF0000';
         }
         
+        function calcAQI(pm25) {
+            const bp = [[0,25,0,50],[25,50,50,100],[50,80,100,150],[80,150,150,200],[150,250,200,300],[250,500,300,500]];
+            for (const [cLo, cHi, iLo, iHi] of bp) {
+                if (pm25 >= cLo && pm25 <= cHi) return Math.round(((iHi-iLo)/(cHi-cLo))*(pm25-cLo)+iLo);
+            }
+            return pm25 > 500 ? 500 : 0;
+        }
+        //Hàm Gauge//
+        // Hàm tạo đồng hồ mới
+        function initGauge(canvasId, maxVal) {
+            return new Chart(document.getElementById(canvasId), {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [0, maxVal],
+                        backgroundColor: ['#4ade80', '#334155'], // Màu xanh ban đầu
+                        borderWidth: 0,
+                        circumference: 180, // Bán nguyệt
+                        rotation: 270,
+                        cutout: '85%' // Độ mỏng của vòng
+                    }]
+                },
+                options: { events: [], responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+            });
+        }
+        function getCol(val, type) {
+            if (type === 'aqi') return getAQIColor(val);
+            if (type === 'pm25') return val <= 25 ? '#4ade80' : val <= 50 ? '#facc15' : val <= 80 ? '#fb923c' : '#ef4444';
+            if (type === 'pm10') return val <= 50 ? '#4ade80' : val <= 100 ? '#facc15' : val <= 150 ? '#fb923c' : '#ef4444';
+            return '#94a3b8';
+        }
+
+        // Hàm cập nhật số liệu cho đồng hồ
+        function updateGauges(nid, data) {
+            // Mapping ID canvas với dữ liệu thực tế
+            const map = {
+                [`g_${nid=='node1'?'n1':'n2'}_pm25`]: {val: data.pm2_5, max: 150, type: 'pm25'},
+                [`g_${nid=='node1'?'n1':'n2'}_pm10`]: {val: data.pm10, max: 300, type: 'pm10'},
+                [`g_${nid=='node1'?'n1':'n2'}_aqi`]: {val: data.aqi, max: 300, type: 'aqi'}
+            };
+
+            for (let [id, info] of Object.entries(map)) {
+                // Nếu chưa có biểu đồ thì tạo mới
+                if (!gaugeInstances[id]) gaugeInstances[id] = initGauge(id, info.max);
+                
+                let chart = gaugeInstances[id];
+                let color = getCol(info.val, info.type); // Lấy màu chuẩn
+                
+                // Update biểu đồ
+                chart.data.datasets[0].data = [info.val, Math.max(0, info.max - info.val)];
+                chart.data.datasets[0].backgroundColor = [color, '#334155']; // Màu giá trị và màu nền xám
+                chart.update();
+
+                // Update số hiển thị ở giữa
+                let txtId = id.replace('g_', 'v_'); // Ví dụ: g_n1_pm25 -> v_n1_pm25
+                let el = document.getElementById(txtId);
+                if(el) {
+                    el.innerText = Math.round(info.val);
+                    el.style.color = color;
+                }
+            }
+        }
         // ============ CHUYỂN CHẾ ĐỘ XEM ============
         function switchView(view) {
-            document.getElementById('dashboardView').classList.remove('active');
-            document.getElementById('heatmapView').classList.remove('active');
-            document.getElementById('btnDashboard').classList.remove('active');
-            document.getElementById('btnHeatmap').classList.remove('active');
+            // 1. Ẩn tất cả các view
+            ['dashboardView', 'predictionView', 'heatmapView', 'gaugesView'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.remove('active');
+            });
             
+            // 2. Bỏ active tất cả nút
+            ['btnDashboard', 'btnPrediction', 'btnHeatmap', 'btnGauges'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.remove('active');
+            });
+
+            // 3. Hiện view được chọn và active nút tương ứng
             if (view === 'dashboard') {
                 document.getElementById('dashboardView').classList.add('active');
                 document.getElementById('btnDashboard').classList.add('active');
+            } else if (view === 'prediction') {
+                document.getElementById('predictionView').classList.add('active');
+                document.getElementById('btnPrediction').classList.add('active');
+                loadPrediction();
+            } else if (view === 'gauges') {
+                document.getElementById('gaugesView').classList.add('active');
+                document.getElementById('btnGauges').classList.add('active');
+
+                // ✅ BẮT BUỘC: render gauge sau khi view hiện
+                setTimeout(() => {
+                    Object.keys(nodeData).forEach(nid => {
+                        if (nodeData[nid]) {
+                            updateGauges(nid, nodeData[nid]);
+                        }
+                    });
+                }, 100);
             } else {
                 document.getElementById('heatmapView').classList.add('active');
                 document.getElementById('btnHeatmap').classList.add('active');
@@ -808,7 +1128,7 @@
                 
                 const icon = L.divIcon({
                     className: 'custom-marker',
-                    html: `<div class="aqi-marker" style="background: ${color}; color: ${aqi <= 100 ? '#000' : '#fff'}">${aqi}</div>`,
+                    html: `<div class="aqi-marker" style="background: ${color}; color: ${aqi <= 100 ? '#000' : '#fff'}">${Math.round(aqi)}</div>`,
                     iconSize: [50, 50],
                     iconAnchor: [25, 25]
                 });
@@ -817,7 +1137,7 @@
                     <div class="popup-content">
                         <div class="popup-header">
                             <span class="popup-title">${node.name}</span>
-                            <span class="popup-aqi" style="background: ${color}; color: ${aqi <= 100 ? '#000' : '#fff'}">${aqi}</span>
+                            <span class="popup-aqi" style="background: ${color}; color: ${aqi <= 100 ? '#000' : '#fff'}">${Math.round(aqi)}</span>
                         </div>
                         <div class="popup-status" style="background: ${color}; color: ${aqi <= 100 ? '#000' : '#fff'}">
                             ${status.emoji} ${status.text}
@@ -832,8 +1152,8 @@
                                 <div class="popup-item-value">${data.pm10?.toFixed(1) || '--'}</div>
                             </div>
                             <div class="popup-item">
-                                <div class="popup-item-label">CO2</div>
-                                <div class="popup-item-value">${data.co2_ppm?.toFixed(0) || '--'}</div>
+                                <div class="popup-item-label">PM1.0</div>
+                                <div class="popup-item-value">${data.pm1_0?.toFixed(1) || '--'}</div>
                             </div>
                         </div>
                     </div>
@@ -864,7 +1184,6 @@
             });
             if (heatLayer) heatLayer.setLatLngs(heatData);
             
-            // Update map sidebar
             updateMapSidebar();
         }
         
@@ -880,13 +1199,13 @@
                     <div class="map-node-card ${aqiClass}" onclick="focusNode('${node.id}')">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                             <span style="font-weight: 600;">📍 ${node.name}</span>
-                            <span class="aqi-badge ${aqiClass}" style="font-size: 1.2em; padding: 5px 10px;">${aqi}</span>
+                            <span class="aqi-badge ${aqiClass}" style="font-size: 1.2em; padding: 5px 10px;">${Math.round(aqi)}</span>
                         </div>
                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; font-size: 0.85em;">
                             <div>PM2.5: <strong>${data.pm2_5?.toFixed(1) || '--'}</strong> μg/m³</div>
                             <div>PM10: <strong>${data.pm10?.toFixed(1) || '--'}</strong> μg/m³</div>
                             <div>Trạng thái: <strong>${status.text}</strong></div>
-                            <div>CO2: <strong>${data.co2_ppm?.toFixed(0) || '--'}</strong> ppm</div>
+                            <div>PM1.0: <strong>${data.pm1_0?.toFixed(1) || '--'}</strong> μg/m³</div>
                         </div>
                     </div>
                 `;
@@ -903,13 +1222,13 @@
         
         // ============ CẬP NHẬT DASHBOARD ============
         function updateDashboard() {
-            // Update node cards
             const mainStats = document.getElementById('mainStats');
             mainStats.innerHTML = NODES.map(node => {
                 const data = nodeData[node.id] || {};
                 const aqi = data.aqi || 0;
                 const aqiClass = getAQIClass(aqi);
                 const status = getAQIStatus(aqi);
+                const anomaly = data.anomaly || {};
                 
                 return `
                     <div class="node-card">
@@ -918,7 +1237,7 @@
                                 <div class="node-name">📍 ${node.name}</div>
                                 <div class="node-location">${node.address}</div>
                             </div>
-                            <div class="aqi-badge ${aqiClass}">${aqi}</div>
+                            <div class="aqi-badge ${aqiClass}">${Math.round(aqi)}</div>
                         </div>
                         <div class="node-status" style="background: ${getAQIColor(aqi)}; color: ${aqi <= 100 ? '#000' : '#fff'}">
                             ${status.emoji} ${status.text}
@@ -939,21 +1258,10 @@
                                 <div class="metric-value">${data.pm1_0?.toFixed(1) || '--'}</div>
                                 <div class="metric-unit">μg/m³</div>
                             </div>
-                            <div class="metric-item">
-                                <div class="metric-label">CO2 <span class="metric-badge who">WHO</span></div>
-                                <div class="metric-value" style="color: ${getMetricColor(data.co2_ppm || 0, 1000)}">${data.co2_ppm?.toFixed(0) || '--'}</div>
-                                <div class="metric-unit">ppm</div>
-                            </div>
-                            <div class="metric-item">
-                                <div class="metric-label">CO <span class="metric-badge qcvn">QCVN</span></div>
-                                <div class="metric-value" style="color: ${getMetricColor(data.co_ppm || 0, 9)}">${data.co_ppm?.toFixed(2) || '--'}</div>
-                                <div class="metric-unit">ppm</div>
-                            </div>
-                            <div class="metric-item">
-                                <div class="metric-label">VOC <span class="metric-badge who">WHO</span></div>
-                                <div class="metric-value" style="color: ${getMetricColor(data.voc_ppm || 0, 0.5)}">${data.voc_ppm?.toFixed(2) || '--'}</div>
-                                <div class="metric-unit">ppm</div>
-                            </div>
+                        </div>
+                        <div class="anomaly-indicator ${anomaly.is_anomaly ? 'warning' : 'normal'}">
+                            ${anomaly.is_anomaly ? '⚠️ Phát hiện bất thường' : '✓ Bình thường'}
+                            ${anomaly.score !== undefined ? `(${anomaly.score.toFixed(2)})` : ''}
                         </div>
                     </div>
                 `;
@@ -964,17 +1272,39 @@
             const alertBar = document.getElementById('alertBar');
             const status = getAQIStatus(worstAqi);
             alertBar.className = `alert-bar ${getAQIClass(worstAqi)}`;
-            document.getElementById('alertText').textContent = `${status.emoji} Chất lượng không khí: ${status.text} (AQI: ${worstAqi})`;
+            document.getElementById('alertText').textContent = `${status.emoji} Chất lượng không khí: ${status.text} (AQI: ${Math.round(worstAqi)})`;
             document.getElementById('alertSuggestion').textContent = status.suggestion;
             
-            // Update suggestions
             updateSuggestions(worstAqi);
         }
         
+        function updateMLStatus() {
+            const pred = mlData.predictor || {};
+            const det = mlData.detector || {};
+            
+            // Header badge
+            const dot = document.getElementById('mlDot');
+            const statusText = document.getElementById('mlStatus');
+            if (det.is_trained) {
+                dot.className = 'ml-dot on';
+                statusText.textContent = 'ML: Active';
+            } else {
+                dot.className = 'ml-dot off';
+                statusText.textContent = 'ML: Training...';
+            }
+            
+            // Dashboard panel
+            document.getElementById('predStatus').className = `ml-status-badge ${pred.is_trained ? 'trained' : 'fallback'}`;
+            document.getElementById('predStatus').textContent = pred.is_trained ? '✓ Trained' : '⚡ Fallback';
+            document.getElementById('predStats').textContent = `Mean: ${pred.stats?.mean?.toFixed(1) || '--'} | Trend: ${pred.stats?.trend?.toFixed(3) || '--'}`;
+            
+            document.getElementById('detStatus').className = `ml-status-badge ${det.is_trained ? 'trained' : 'fallback'}`;
+            document.getElementById('detStatus').textContent = det.is_trained ? '✓ Isolation Forest' : '⚡ Z-score';
+            document.getElementById('detStats').textContent = `Mean: ${det.stats?.mean?.toFixed(1) || '--'} | Std: ${det.stats?.std?.toFixed(1) || '--'}`;
+        }
+        
         function updateSuggestions(aqi) {
-            const status = getAQIStatus(aqi);
             const suggestions = [];
-
             if (aqi <= 50) {
                 suggestions.push('✅ Có thể tập thể dục ngoài trời');
                 suggestions.push('✅ Mở cửa sổ để thông gió');
@@ -993,73 +1323,182 @@
                 suggestions.push('😷 Bắt buộc đeo khẩu trang N95 khi ra ngoài');
                 suggestions.push('🚫 Tránh mọi hoạt động ngoài trời');
             }
-
-            document.getElementById('healthSuggestions').innerHTML =
-                suggestions.map(s => `<li>${s}</li>`).join('');
-
-            // THỐNG KÊ HIỆN TẠI CHO NODE 1 & 2
+            document.getElementById('healthSuggestions').innerHTML = suggestions.map(s => `<li>${s}</li>`).join('');
+            
+            // Today stats
             const node1 = nodeData['node1'] || {};
             const node2 = nodeData['node2'] || {};
             const statData = [
-                `📉 AQI hiện tại Node 1: <strong>${node1.aqi || '--'}</strong>`,
+                `📉 AQI Node 1: <strong>${Math.round(node1.aqi || 0)}</strong>`,
                 `🌫️ PM2.5: <strong>${node1.pm2_5?.toFixed(1) || '--'}</strong> μg/m³`,
                 `☁️ PM10: <strong>${node1.pm10?.toFixed(1) || '--'}</strong> μg/m³`,
                 '',
-                `📉 AQI hiện tại Node 2: <strong>${node2.aqi || '--'}</strong>`,
+                `📉 AQI Node 2: <strong>${Math.round(node2.aqi || 0)}</strong>`,
                 `🌫️ PM2.5: <strong>${node2.pm2_5?.toFixed(1) || '--'}</strong> μg/m³`,
                 `☁️ PM10: <strong>${node2.pm10?.toFixed(1) || '--'}</strong> μg/m³`,
                 '',
-                `📏 Tiêu chuẩn: <strong>QCVN 05:2023 + WHO 2021</strong>`
+                `📏 Tiêu chuẩn: <strong>QCVN 05:2023</strong>`
             ];
-            document.getElementById('todayStats').innerHTML =
-                statData.map(s => `<li>${s}</li>`).join('');
+            document.getElementById('todayStats').innerHTML = statData.map(s => `<li>${s}</li>`).join('');
+            
+            // AQI Ranking
+            updateAQIRankingDisplay();
+        }
+        
+        function updateAQIRanking(triggerFetch = true) {
+            const dateStr = document.getElementById('rankingDate').value;
+            if (!dateStr) return;
 
-            // 💡 MỐC GIỜ TRÒN: lấy giờ hiện tại, lùi về 3 mốc gần nhất
+            if (triggerFetch) {
+                fetchHistoryByDate(dateStr);
+                return;
+            }
+
+            const selectedDate = new Date(dateStr);
             const now = new Date();
+            
+            // Kiểm tra xem có phải hôm nay không
+            const isToday = selectedDate.toDateString() === now.toDateString();
             const currentHour = now.getHours();
 
-            const fixedTimeSlots = []; // ví dụ 3 slot gần nhất
-            for (let i = 3; i >= 1; i--) {
-                const hour = currentHour - i; // đảm bảo hợp lệ
-                if (hour >= 0) {
-                    fixedTimeSlots.push({ from: hour, to: hour + 1 });
+            // Kiểm tra ngày 19/12/2025 (Tháng 12 là 11 trong JS)
+            const isPowerOutageDate = selectedDate.getDate() === 19 && 
+                                     selectedDate.getMonth() === 11 && 
+                                     selectedDate.getFullYear() === 2025;
+
+            const rankingItems = [];
+
+            // Vòng lặp từ 00:00 đến 23:00
+            for (let hour = 0; hour < 24; hour++) {
+                const label = `${hour.toString().padStart(2, '0')}:00 → ${(hour + 1).toString().padStart(2, '0')}:00`;
+                
+                // 1. Tương lai (Hôm nay) -> Đang cập nhật
+                if (isToday && hour > currentHour) {
+                    rankingItems.push(`
+                        <li style="opacity: 0.5; font-style: italic; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 10px 0;">
+                            🕒 <strong>${label}</strong>: ⏳ Đang cập nhật...
+                        </li>
+                    `);
+                    continue; 
+                }
+
+                // 2. Sự cố mất điện ngày 19 (11h - 19h)
+                if (isPowerOutageDate && hour >= 11 && hour <= 19) {
+                    rankingItems.push(`
+                        <li style="color: #ef4444; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 10px 0;">
+                            🕒 <strong>${label}</strong>: ⚡ Mất kết nối (Sự cố điện)
+                        </li>
+                    `);
+                    continue;
+                }
+
+                // 3. Xử lý dữ liệu bình thường
+                const fromTime = new Date(selectedDate);
+                fromTime.setHours(hour, 0, 0, 0);
+                const toTime = new Date(fromTime);
+                toTime.setHours(hour + 1, 0, 0, 0);
+
+                // Lấy từ rankingData (biến riêng)
+                const results = NODES.map(node => {
+                    const records = (rankingData[node.id] || []).filter(h => {
+                        const t = new Date(h.time).getTime();
+                        return t >= fromTime.getTime() && t < toTime.getTime();
+                    });
+
+                    const avg = records.length
+                        ? Math.round(records.reduce((sum, r) => sum + r.aqi, 0) / records.length)
+                        : '--';
+
+                    return { node: node.name, avg };
+                });
+
+                const validResults = results.filter(r => r.avg !== '--');
+                
+                if (validResults.length === 0) {
+                    rankingItems.push(`
+                        <li style="color: #94a3b8; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 10px 0;">
+                            🕒 <strong>${label}</strong>: ⚠️ Chưa có dữ liệu
+                        </li>
+                    `);
+                } else {
+                    validResults.sort((a, b) => b.avg - a.avg);
+                    const top = validResults[0]; 
+                    let color = getAQIColor(top.avg);
+
+                    // 👇 ĐÃ SỬA: Chỉ đổi màu chữ (color), bỏ background
+                    rankingItems.push(`
+                        <li style="border-bottom: 1px solid rgba(255,255,255,0.05); padding: 10px 0;">
+                            🕒 <strong>${label}</strong>: ${top.node} 
+                            <span style="color: ${color}; font-weight: bold; font-size: 1em; margin-left: 8px;">
+                                ${top.avg}
+                            </span>
+                        </li>
+                    `);
                 }
             }
 
-            const formatTime = h => `${h.toString().padStart(2, '0')}:00`;
+            document.getElementById('aqiRanking').innerHTML = rankingItems.join('');
+        }
+        
+        function updateAQIRankingDisplay() {
+            // 1. Lấy ngày từ ô input
+            const dateInput = document.getElementById('rankingDate').value;
+            if (!dateInput) return;
+            
+            const selectedDate = new Date(dateInput);
+            const rankList = [];
 
-            const rankList = fixedTimeSlots.map(slot => {
-                const fromHour = slot.from;
-                const toHour = slot.to;
+            // 2. Duyệt qua 24 giờ của ngày đó
+            // (Nếu muốn hiển thị ngược từ 23h về 0h thì dùng vòng lặp ngược)
+            for (let hour = 0; hour < 24; hour++) {
+                const fromTime = new Date(selectedDate);
+                fromTime.setHours(hour, 0, 0, 0);
+                
+                const toTime = new Date(selectedDate);
+                toTime.setHours(hour + 1, 0, 0, 0);
 
-                const fromTime = new Date();
-                fromTime.setHours(fromHour, 0, 0, 0);
+                // Chỉ hiện các giờ trong quá khứ (nếu là ngày hôm nay)
+                if (fromTime > new Date()) continue;
 
-                const toTime = new Date();
-                toTime.setHours(toHour, 0, 0, 0);
-
-                // Tính trung bình AQI cho mỗi node trong mốc giờ tròn
                 const results = NODES.map(node => {
                     const records = (historyData[node.id] || []).filter(h => {
                         const t = new Date(h.time).getTime();
                         return t >= fromTime.getTime() && t < toTime.getTime();
                     });
 
-                    const avgAQI = records.length
-                        ? Math.round(records.reduce((sum, r) => sum + r.aqi, 0) / records.length)
-                        : 0;
-
+                    // Tính trung bình
+                    const avgAQI = records.length 
+                        ? Math.round(records.reduce((sum, r) => sum + (r.aqi || 0), 0) / records.length) 
+                        : '--';
+                        
                     return { node: node.name, avg: avgAQI };
                 });
 
-                results.sort((a, b) => b.avg - a.avg); // xếp từ cao đến thấp
+                // Sắp xếp: Node ô nhiễm hơn đứng trước
+                results.sort((a, b) => {
+                    if (a.avg === '--') return 1;
+                    if (b.avg === '--') return -1;
+                    return b.avg - a.avg; 
+                });
+
                 const top = results[0];
+                
+                // Format giờ hiển thị (VD: 09:00 -> 10:00)
+                const timeLabel = `${hour.toString().padStart(2, '0')}:00 → ${(hour + 1).toString().padStart(2, '0')}:00`;
+                
+                // Chỉ hiển thị nếu có dữ liệu
+                if (top.avg !== '--') {
+                    rankList.push(`<li>🕒 <strong>${timeLabel}</strong>: ${top.node} <span style="opacity:0.8">(AQI TB: ${top.avg})</span></li>`);
+                }
+            }
 
-                return `🕒 <strong>${formatTime(fromHour)} → ${formatTime(toHour)}</strong>: ${top.node} <span style="opacity:0.8">(AQI TB: ${top.avg})</span>`;
-            });
+            // Nếu không có dữ liệu nào
+            if (rankList.length === 0) {
+                rankList.push('<li>⚠️ Chưa có dữ liệu cho ngày này</li>');
+            }
 
-            document.getElementById('aqiRanking').innerHTML =
-                rankList.map(r => `<li>${r}</li>`).join('');
+            // Đảo ngược để giờ mới nhất lên đầu (tùy chọn)
+            document.getElementById('aqiRanking').innerHTML = rankList.join('');
         }
         
         // ============ BIỂU ĐỒ ============
@@ -1075,10 +1514,9 @@
             const datasets = NODES.map((node, index) => {
                 const history = historyData[node.id] || [];
                 const colors = ['#2196F3', '#4CAF50', '#FF9800', '#E91E63'];
-                
                 return {
                     label: node.name,
-                    data: history.map(h => ({ x: new Date(h.time), y: h.aqi })),
+                    data: history.map(h => ({ x: new Date(h.time), y: h.aqi || 0 })),
                     borderColor: colors[index % colors.length],
                     backgroundColor: colors[index % colors.length] + '20',
                     fill: true,
@@ -1099,42 +1537,24 @@
                         plugins: {
                             legend: { labels: { color: '#fff' } },
                             zoom: {
-                                pan: {
-                                    enabled: true,
-                                    mode: 'x'
-                                },
+                                pan: { enabled: true, mode: 'x' },
                                 zoom: {
-                                    wheel: {
-                                    enabled: true,
-                                    },
-                                    drag: {
-                                    enabled: true,
-                                    borderColor: 'rgba(255,255,255,0.8)',
-                                    borderWidth: 1
-                                    },
-                                    pinch: {
-                                    enabled: true
-                                    },
+                                    wheel: { enabled: true },
+                                    drag: { enabled: true, borderColor: 'rgba(255,255,255,0.8)', borderWidth: 1 },
+                                    pinch: { enabled: true },
                                     mode: 'x'
                                 },
-                                limits: {
-                                    x: {
-                                    minRange: 60 * 1000
-                                    }
-                                }
+                                limits: { x: { minRange: 60 * 1000 } }
                             }
                         },
                         scales: {
                             x: {
-                            type: 'time',
-                            time: { unit: 'minute', displayFormats: { minute: 'HH:mm' } },
-                            ticks: { color: '#888' },
-                            grid: { color: 'rgba(255,255,255,0.1)' }
+                                type: 'time',
+                                time: { unit: 'minute', displayFormats: { minute: 'HH:mm', hour: 'HH:mm', day: 'dd/MM' } },
+                                ticks: { color: '#888' },
+                                grid: { color: 'rgba(255,255,255,0.1)' }
                             },
-                            y: {
-                            ticks: { color: '#888' },
-                            grid: { color: 'rgba(255,255,255,0.1)' }
-                            }
+                            y: { ticks: { color: '#888' }, grid: { color: 'rgba(255,255,255,0.1)' } }
                         }
                     }
                 });
@@ -1144,11 +1564,11 @@
         function updatePMChart() {
             const ctx = document.getElementById('pmChart').getContext('2d');
             const history = historyData['node1'] || [];
-
+            
             const datasets = [
                 {
                     label: 'PM2.5 (μg/m³)',
-                    data: history.map(h => ({ x: new Date(h.time), y: h.pm2_5 })),
+                    data: history.map(h => ({ x: new Date(h.time), y: h.pm2_5 || 0 })),
                     borderColor: '#2196F3',
                     backgroundColor: '#2196F320',
                     fill: true,
@@ -1156,14 +1576,14 @@
                 },
                 {
                     label: 'PM10 (μg/m³)',
-                    data: history.map(h => ({ x: new Date(h.time), y: h.pm10 })),
+                    data: history.map(h => ({ x: new Date(h.time), y: h.pm10 || 0 })),
                     borderColor: '#4CAF50',
                     backgroundColor: '#4CAF5020',
                     fill: true,
                     tension: 0.4
                 }
             ];
-
+            
             if (pmChart) {
                 pmChart.data.datasets = datasets;
                 pmChart.update();
@@ -1177,100 +1597,30 @@
                         plugins: {
                             legend: { labels: { color: '#fff' } },
                             zoom: {
-                                pan: {
-                                    enabled: true,
-                                    mode: 'x'
-                                },
+                                pan: { enabled: true, mode: 'x' },
                                 zoom: {
-                                    wheel: {
-                                        enabled: true,
-                                    },
-                                    drag: {
-                                        enabled: true,
-                                        borderColor: 'rgba(255,255,255,0.8)',
-                                        borderWidth: 1
-                                    },
-                                    pinch: {
-                                        enabled: true
-                                    },
+                                    wheel: { enabled: true },
+                                    drag: { enabled: true, borderColor: 'rgba(255,255,255,0.8)', borderWidth: 1 },
+                                    pinch: { enabled: true },
                                     mode: 'x'
                                 },
-                                limits: {
-                                    x: {
-                                        minRange: 60 * 1000
-                                    }
-                                }
+                                limits: { x: { minRange: 60 * 1000 } }
                             }
                         },
                         scales: {
                             x: {
                                 type: 'time',
-                                time: {
-                                    unit: 'minute',
-                                    displayFormats: { minute: 'HH:mm' }
-                                },
+                                time: { unit: 'minute', displayFormats: { minute: 'HH:mm' } },
                                 ticks: { color: '#888' },
                                 grid: { color: 'rgba(255,255,255,0.1)' }
                             },
-                            y: {
-                                ticks: { color: '#888' },
-                                grid: { color: 'rgba(255,255,255,0.1)' }
-                            }
+                            y: { ticks: { color: '#888' }, grid: { color: 'rgba(255,255,255,0.1)' } }
                         }
                     }
                 });
             }
         }
-        function updateAQIRanking(triggerFetch = true) {
-            const dateStr = document.getElementById('rankingDate').value;
-            if (!dateStr) return;
-
-            if (triggerFetch) {
-                fetchHistoryByDate(dateStr);
-                return;
-            }
-
-            const selectedDate = new Date(dateStr + 'T00:00:00');
-
-            const rankingItems = [];
-
-            for (let hour = 0; hour < 24; hour++) {
-                const fromTime = new Date(selectedDate);
-                fromTime.setHours(hour, 0, 0, 0);
-                const toTime = new Date(fromTime);
-                toTime.setHours(hour + 1, 0, 0, 0);
-
-                const results = NODES.map(node => {
-                    const records = (historyData[node.id] || []).filter(h => {
-                        const t = new Date(h.time).getTime();
-                        return t >= fromTime.getTime() && t < toTime.getTime();
-                    });
-
-                    const avg = records.length
-                        ? Math.round(records.reduce((sum, r) => sum + r.aqi, 0) / records.length)
-                        : '--';
-
-                    return { node: node.name, avg };
-                });
-
-                results.sort((a, b) => {
-                    if (a.avg === '--') return 1;
-                    if (b.avg === '--') return -1;
-                    return b.avg - a.avg;
-                });
-
-                const top = results[0];
-                const label = `${hour.toString().padStart(2, '0')}:00 → ${(hour + 1).toString().padStart(2, '0')}:00`;
-                const display = top.avg === '--'
-                    ? `🕒 <strong>${label}</strong>: Đang cập nhật`
-                    : `🕒 <strong>${label}</strong>: ${top.node} <span style="opacity: 0.85">(AQI TB: ${top.avg})</span>`;
-
-                rankingItems.push(`<li>${display}</li>`);
-            }
-
-            document.getElementById('aqiRanking').innerHTML = rankingItems.join('');
-        }
-
+        
         function updateMiniChart() {
             const ctx = document.getElementById('miniChart');
             if (!ctx) return;
@@ -1282,7 +1632,7 @@
                 const colors = ['#2196F3', '#4CAF50'];
                 return {
                     label: node.name.split(' - ')[1],
-                    data: nodeHistory.map(h => h.aqi),
+                    data: nodeHistory.map(h => h.aqi || 0),
                     borderColor: colors[index],
                     backgroundColor: colors[index] + '40',
                     fill: true,
@@ -1315,42 +1665,143 @@
                 });
             }
         }
+        
         function resetZoom() {
-            comparisonChart?.resetZoom();
+            if (comparisonChart && comparisonChart.resetZoom) comparisonChart.resetZoom();
             pmChart?.resetZoom();
             miniChart?.resetZoom();
+            predictionChart?.resetZoom();
         }
+        
+        // ============ ML PREDICTION ============
+        async function loadPrediction() {
+            try {
+                const predRes = await fetch(`${API_BASE_URL}/api/predict?node_id=node1&hours=24`);
+                predictionData = await predRes.json();
+                
+                const anomRes = await fetch(`${API_BASE_URL}/api/anomaly?node_id=node1&hours=24`);
+                anomalyData = await anomRes.json();
+                
+                updatePredictionView();
+            } catch (e) {
+                console.error('Error loading prediction:', e);
+            }
+        }
+        
+        function updatePredictionView() {
+            if (!predictionData || predictionData.status !== 'success') return;
+            
+            const preds = predictionData.predictions || [];
+            const predObjects = preds.map((p, i) => {
+                if (typeof p === 'number') {
+                    const aqi = calcAQI(p);
+                    return { hour: i + 1, pm2_5: p, aqi, color: getAQIColor(aqi) };
+                }
+                return { ...p, color: getAQIColor(p.aqi || calcAQI(p.pm2_5)) };
+            });
+            
+            // Summary
+            const pm25Values = predObjects.map(p => p.pm2_5);
+            const sum = predictionData.summary || {
+                avg: pm25Values.reduce((a,b)=>a+b,0) / pm25Values.length,
+                max: Math.max(...pm25Values),
+                min: Math.min(...pm25Values)
+            };
+            
+            document.getElementById('predModel').textContent = predictionData.model || 'LSTM';
+            document.getElementById('predAvg').textContent = sum.avg?.toFixed(1) || '--';
+            document.getElementById('predAvg').style.color = getAQIColor(calcAQI(sum.avg));
+            document.getElementById('predMax').textContent = sum.max?.toFixed(1) || '--';
+            document.getElementById('predMax').style.color = getAQIColor(calcAQI(sum.max));
+            document.getElementById('predMin').textContent = sum.min?.toFixed(1) || '--';
+            document.getElementById('predMin').style.color = getAQIColor(calcAQI(sum.min));
+            
+            // Prediction cards
+            document.getElementById('predictionCards').innerHTML = predObjects.map(p => {
+                const aqi = p.aqi || calcAQI(p.pm2_5);
+                const color = p.color || getAQIColor(aqi);
+                return `
+                    <div class="pred-card">
+                        <div class="pred-time">+${p.hour}h</div>
+                        <div class="pred-value" style="color: ${color}">${p.pm2_5.toFixed(1)}</div>
+                        <div class="pred-aqi" style="background: ${color}; color: ${aqi <= 100 ? '#000' : '#fff'}">
+                            AQI ${Math.round(aqi)}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Prediction chart
+            const ctx = document.getElementById('predictionChart').getContext('2d');
+            if (predictionChart) predictionChart.destroy();
+            
+            predictionChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: predObjects.map(p => `+${p.hour}h`),
+                    datasets: [{
+                        label: 'PM2.5 Dự báo',
+                        data: predObjects.map(p => p.pm2_5),
+                        borderColor: '#a855f7',
+                        backgroundColor: 'rgba(168,85,247,0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: predObjects.map(p => p.color)
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#fff' } },
+                        zoom: {
+                            pan: { enabled: true, mode: 'x' },
+                            zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
+                        }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#888' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        y: { min: 0, ticks: { color: '#888' }, grid: { color: 'rgba(255,255,255,0.1)' } }
+                    }
+                }
+            });
+            
+            // Anomaly section
+            if (anomalyData?.status === 'success') {
+                document.getElementById('anomalySummary').innerHTML = `
+                    <div class="pred-summary-item">
+                        <div class="pred-summary-label">Model</div>
+                        <div class="pred-summary-value" style="font-size: 1em;">${anomalyData.model || 'IF'}</div>
+                    </div>
+                    <div class="pred-summary-item">
+                        <div class="pred-summary-label">Total Points</div>
+                        <div class="pred-summary-value">${anomalyData.total_points}</div>
+                    </div>
+                    <div class="pred-summary-item">
+                        <div class="pred-summary-label">Anomalies</div>
+                        <div class="pred-summary-value" style="color: ${anomalyData.anomaly_count > 0 ? '#ef4444' : '#22c55e'}">${anomalyData.anomaly_count}</div>
+                    </div>
+                    <div class="pred-summary-item">
+                        <div class="pred-summary-label">Rate</div>
+                        <div class="pred-summary-value">${anomalyData.anomaly_rate}%</div>
+                    </div>
+                `;
+            }
+        }
+        
+        function changeTimeRange(hours, event) {
+            currentTimeRange = hours;
 
-        function getAverageAQIByHours(hours = 1) {
-            const now = Date.now();
-            const result = [];
+            document.querySelectorAll('.time-tab')
+                .forEach(t => t.classList.remove('active'));
 
-            for (const node of NODES) {
-                const records = (historyData[node.id] || []).filter(h => {
-                    const delta = now - new Date(h.time).getTime();
-                    return delta <= hours * 3600000; // trong `hours` giờ vừa qua
-                });
-
-                const avg = records.length > 0
-                    ? (records.reduce((sum, h) => sum + h.aqi, 0) / records.length)
-                    : 0;
-
-                result.push({
-                    nodeId: node.id,
-                    name: node.name,
-                    avgAQI: Math.round(avg)
-                });
+            if (event && event.target) {
+                event.target.classList.add('active');
             }
 
-            return result.sort((a, b) => b.avgAQI - a.avgAQI); // sắp xếp từ cao → thấp
-        }
-
-        function changeTimeRange(hours) {
-            currentTimeRange = hours;
-            document.querySelectorAll('.time-tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
             fetchHistory(hours);
         }
+
         
         // ============ API ============
         async function fetchNodeData(nodeId) {
@@ -1366,12 +1817,10 @@
             return null;
         }
         
-        async function fetchHistoryByDate(dateStr) {
+        async function fetchHistory(hours) {
             for (const node of NODES) {
-                const url = `${API_BASE_URL}/api/history?node_id=${node.id}&hours=48`; // lấy đủ 2 ngày
-
                 try {
-                    const res = await fetch(url);
+                    const res = await fetch(`${API_BASE_URL}/api/history?node_id=${node.id}&hours=${hours}`);
                     if (res.ok) {
                         const data = await res.json();
                         if (data.status === 'success') {
@@ -1379,40 +1828,113 @@
                         }
                     }
                 } catch (e) {
-                    console.error(`Lỗi khi lấy history của ${node.id}:`, e);
+                    console.error(`Error fetching history for ${node.id}:`, e);
                 }
             }
-
-            updateAQIRanking(false); // xử lý xếp hạng sau khi có dữ liệu
+            updateCharts();
         }
         
-        async function refreshData() {
-            document.getElementById('loading').classList.remove('hidden');
-
+        async function fetchHistoryByDate(dateStr) {
             for (const node of NODES) {
-                const data = await fetchNodeData(node.id);
-                if (data) nodeData[node.id] = data;
+                try {
+                    // Luôn lấy 48 giờ cho bảng xếp hạng
+                    const res = await fetch(`${API_BASE_URL}/api/history?node_id=${node.id}&hours=168`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.status === 'success') {
+                            // 👇 Lưu vào rankingData để không bị biểu đồ ghi đè
+                            rankingData[node.id] = data.data || [];
+                        }
+                    }
+                } catch (e) {
+                    console.error(`Error fetching ranking history for ${node.id}:`, e);
+                }
+            }
+            updateAQIRanking(false);
+        }
+        
+        async function fetchMLStatus() {
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/ml/status`);
+                if (res.ok) {
+                    mlData = await res.json();
+                    updateMLStatus();
+                }
+            } catch (e) {
+                console.error('Error fetching ML status:', e);
+            }
+        }
+        
+        // Thêm tham số isBackground = false mặc định
+        // Thêm tham số isBackground
+        // Thêm tham số isBackground = false mặc định
+        async function refreshData(isBackground = false) {
+            // 👇 CHỈ hiện loading nếu KHÔNG PHẢI chạy ngầm
+            if (!isBackground) {
+                document.getElementById('loading').classList.remove('hidden');
             }
 
-            // LẤY NGÀY ĐANG CHỌN TRÊN CALENDAR
-            const dateStr = document.getElementById('rankingDate').value;
-            await fetchHistoryByDate(dateStr);  // GỌI ĐÚNG CÁI ĐANG XÀI!
+            try {
+                // 1. Current Data
+                for (const node of NODES) {
+                    const resData = await fetchNodeData(node.id);
+                    if (resData) {
+                        // API trả về trực tiếp các trường, không nằm trong 'data'
+                        // (Dựa trên curl mẫu của bạn: {"status":"success", "pm2_5": 22.0 ...})
+                        nodeData[node.id] = resData; 
+                        
+                        // Cập nhật Gauges
+                        if (document.getElementById('gaugesView').classList.contains('active')) {
+                            updateGauges(node.id, nodeData[node.id]);
+                        }
 
-            updateDashboard();
-            updateCharts();
-            updateAQIRanking(false); // KHÔNG fetch nữa, chỉ cập nhật
+                    }
+                }
+                
+                // 2. Chart History (Biểu đồ)
+                await fetchHistory(currentTimeRange);
+                
+                // 3. Ranking Data (Bảng xếp hạng)
+                // Chỉ nạp lại bảng xếp hạng khi load trang lần đầu hoặc người dùng đổi ngày
+                if (!isBackground) {
+                     const dateInput = document.getElementById('rankingDate');
+                     if(dateInput && dateInput.value) {
+                         await fetchHistoryByDate(dateInput.value);
+                     }
+                }
 
-            if (map) updateMapMarkers();
-
-            document.getElementById('lastUpdate').textContent = `🕐 ${new Date().toLocaleTimeString('vi-VN')}`;
-            document.getElementById('loading').classList.add('hidden');
+                // 4. ML Status
+                await fetchMLStatus();
+                
+                // Update UI
+                updateDashboard();
+                updateCharts();
+                if (map) updateMapMarkers();
+                
+                // Cập nhật lại giao diện bảng xếp hạng
+                updateAQIRanking(false); 
+                
+                const timeStr = new Date().toLocaleTimeString('vi-VN');
+                document.getElementById('lastUpdate').textContent = `🕐 ${timeStr}`;
+            } catch (e) {
+                console.error("Refresh Error:", e);
+            } finally {
+                // 👇 Luôn ẩn loading khi xong
+                document.getElementById('loading').classList.add('hidden');
+            }
         }
         
         // ============ KHỞI TẠO ============
         document.addEventListener('DOMContentLoaded', () => {
-            refreshData();
-            setInterval(refreshData, 30000);
             document.getElementById('rankingDate').valueAsDate = new Date();
+            
+            // Lần đầu: Hiện loading
+            refreshData(false);
+            
+            // Định kỳ 30s: Chạy ngầm (TRUE) -> KHÔNG hiện loading
+            setInterval(() => {
+                refreshData(true);
+            }, 30000);
         });
     </script>
 </body>
