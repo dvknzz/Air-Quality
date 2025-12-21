@@ -19,7 +19,53 @@
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+        /* ===== TOP ACADEMIC BANNER ===== */
+        .top-banner {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            padding: 14px 32px;
+            background: linear-gradient(180deg, #0f172a, #020617);
+            border-bottom: 1px solid rgba(255,255,255,0.00);
+        }
+
+        .banner-logo {
+            height: 70px;          /* 👈 TO, rõ */
+            object-fit: contain;
+        }
+
+        .banner-logo.left {
+            justify-self: start;
+        }
+
+        .banner-logo.right {
+            justify-self: end;
+        }
+
+        .banner-center {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .banner-title {
+            font-size: 2.2em;        /* TO – đúng chuẩn banner */
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: #e5e7eb;
+            text-transform: uppercase;
+            line-height: 1.2;
+        }
+
+        .banner-subtitle {
+            font-size: 1.05em;
+            margin-top: 6px;
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+
         body {
             background: #111827;
             color: #f1f5f9;
@@ -47,31 +93,48 @@
         #gaugesView.active {
             display: block;
         }
+        
+        .qcvn-note {
+            margin-top: 30px;          /* ⬅️ Cách xa gauges phía trên */
+            margin-bottom: 12px;       /* ⬅️ Cách bảng QCVN bên dưới */
+            padding: 12px 16px;
+            border-left: 4px solid #38bdf8;
+            background: rgba(56,189,248,0.08);
+            color: #cbd5e1;
+            font-size: 1.3em;
+            border-radius: 8px;
+            line-height: 1.5;
+        }
+        .qcvn-highlight {
+            color: #ffd700;
+            font-weight: 600;
+            text-shadow: 0 0 6px rgba(255,215,0,0.25);
+        }
 
 
         /* Style cho từng đồng hồ */
         .gauge-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; height: 100%; }
         .gauge-container { 
             position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: rgba(255,255,255,0.02); border-radius: 12px; padding: 10px;
+            background: rgba(255,255,255,0.02); border-radius: 12px; padding: 16px;
         }
         .gauge-canvas-box { position: relative; width: 100%; height: 120px; display: flex; justify-content: center; }
         .gauge-value {
             position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-            font-size: 2em; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            font-size: 3.4em; font-weight: 800; letter-spacing: 0.5px;text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
-        .gauge-label { font-size: 1.1em; color: #cbd5e1; margin-bottom: 5px; font-weight: 600; }
-        .gauge-unit { font-size: 0.8em; color: #64748b; margin-top: -15px; }
+        .gauge-label { font-size: 2.1em; color: #cbd5e1; margin-bottom: 5px; font-weight: 800; letter-spacing: 0.3px; }
+        .gauge-unit { font-size: 1.1em; color: #64748b; margin-top: -10px; }
 
         /* Style cho bảng chú thích */
-        .legend-table { width: 100%; border-collapse: collapse; font-size: 0.95em; text-align: center; }
+        .legend-table { width: 100%; border-collapse: collapse; font-size: 1.3em; text-align: center; }
         .legend-table th, .legend-table td { padding: 8px; border: 1px solid rgba(255,255,255,0.1); }
         .legend-table th { background: rgba(255,255,255,0.05); color: #94a3b8; }
 
         /* ============ HEADER ============ */
         .header {
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            padding: 12px 20px;
+            padding: 18px 28px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -79,32 +142,35 @@
             top: 0;
             z-index: 1000;
             box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+            min-height: 72px;
         }
         
         .logo {
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 1.3em;
+            font-size: 1.6em;
             font-weight: bold;
+            letter-spacing: 0.4px;
         }
         
         .header-center {
             display: flex;
-            gap: 5px;
+            gap: 12px;
         }
         
         .view-btn {
-            padding: 8px 20px;
+            padding: 12px 26px;
             border: none;
-            border-radius: 20px;
+            border-radius: 26px;
             cursor: pointer;
-            font-weight: 600;
+            font-weight: 700;
             transition: all 0.3s;
-            font-size: 0.9em;
+            font-size: 1.1em;
         }
         
         .view-btn.active {
+            box-shadow: 0 0 0 2px rgba(255,255,255,0.35);
             background: #fff;
             color: #1e3c72;
         }
@@ -125,7 +191,7 @@
         }
         
         .last-update {
-            font-size: 0.85em;
+            font-size: 1em;
             opacity: 0.9;
         }
         
@@ -137,6 +203,7 @@
             border-radius: 20px;
             cursor: pointer;
             transition: all 0.3s;
+            font-size: 1em;
         }
         
         .refresh-btn:hover {
@@ -148,10 +215,11 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 6px 14px;
+            padding: 8px 18px;
             background: rgba(168,85,247,0.3);
             border-radius: 20px;
-            font-size: 0.85em;
+            font-size: 1em;
+            font-weight: 600;
         }
         .ml-dot {
             width: 8px;
@@ -167,17 +235,17 @@
         .alert-bar {
             border-radius: 0;
             box-shadow: inset 0 0 10px rgba(0,0,0,0.15);
-            font-size: 1em;
+            font-size: 1.15em;
             font-weight: bold;
             letter-spacing: 0.5px;
-            padding: 14px 24px;
+            padding: 16px 28px;
             display: flex;
             align-items: center;
             gap: 12px;
         }
         .alert-icon { font-size: 1.4em; }
-        .alert-text { flex: 1; }
-        .alert-suggestion { font-size: 0.9em; font-style: italic; opacity: 0.9; }
+        .alert-text { flex: 1; font-size: 1.3em;}
+        .alert-suggestion { font-size: 1.3em; font-style: italic; opacity: 0.9; }
         
         .alert-bar.good { background: linear-gradient(90deg, #00E400, #00c400); color: #000; }
         .alert-bar.moderate { background: linear-gradient(90deg, #FFFF00, #e6e600); color: #000; }
@@ -189,8 +257,28 @@
         .dashboard-view {
             padding: 20px;
             display: none;
+            font-size: 16px;
         }
-        
+        /* Tiêu đề section */
+        .dashboard-view .section-title {
+            font-size: 1.4em;
+        }
+
+        /* AQI badge lớn hơn */
+        .dashboard-view .aqi-badge {
+            font-size: 2em;
+        }
+
+        /* Giá trị PM */
+        .dashboard-view .metric-value {
+            font-size: 1.8em;
+        }
+
+        /* Chữ trong alert bar */
+        .alert-bar {
+            font-size: 1.05em;
+        }
+
         .dashboard-view.active { display: block; }
         
         /* Main Stats */
@@ -218,10 +306,11 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
+            font-size: 22px;
         }
         
         .node-name { font-size: 1.1em; font-weight: 600; }
-        .node-location { font-size: 0.8em; color: #888; margin-top: 3px; }
+        .node-location { font-size: 1em; color: #888; margin-top: 3px; }
         
         .aqi-badge {
             font-size: 2em;
@@ -243,6 +332,7 @@
             border-radius: 8px;
             margin-bottom: 15px;
             font-weight: 500;
+            font-size: 25px;
         }
         
         .metrics-grid {
@@ -261,9 +351,9 @@
         }
         .metric-item:hover { background: #334155; }
         
-        .metric-label { color: #94a3b8; font-size: 0.8em; margin-bottom: 4px; }
-        .metric-value { font-size: 1.6em; font-weight: 700; color: #38bdf8; }
-        .metric-unit { font-size: 0.7em; color: #666; }
+        .metric-label { color: #94a3b8; font-size: 1.2em; margin-bottom: 4px; }
+        .metric-value { font-size: 1.7em; font-weight: 700; color: #38bdf8; }
+        .metric-unit { font-size: 1.2em; color: #666; }
         
         .metric-badge {
             font-size: 0.6em;
@@ -271,7 +361,7 @@
             border-radius: 4px;
             margin-left: 5px;
         }
-        .metric-badge.qcvn { background: #4CAF50; }
+        .metric-badge.qcvn { font-weight: bold; color: #000000;background: #d1b204; }
         .metric-badge.who { background: #2196F3; }
         
         /* Anomaly Badge on Node Card */
@@ -281,7 +371,7 @@
             gap: 6px;
             padding: 6px 12px;
             border-radius: 20px;
-            font-size: 0.8em;
+            font-size: 1em;
             margin-top: 12px;
         }
         .anomaly-indicator.normal { background: rgba(34,197,94,0.15); color: #22c55e; }
@@ -368,7 +458,7 @@
         }
         .ml-model-item {
             background: rgba(255,255,255,0.03);
-            padding: 14px;
+            padding: 18px;
             border-radius: 12px;
             margin-bottom: 10px;
         }
@@ -378,23 +468,47 @@
             align-items: center;
             margin-bottom: 8px;
         }
+
+        /* Tăng size tiêu đề Predictor (LSTM) */
+        .ml-model-header span:first-child {
+            font-size: 1.15em;      /* tăng vừa đẹp */
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
         .ml-status-badge {
             padding: 4px 10px;
             border-radius: 12px;
-            font-size: 0.75em;
+            font-size: 1em;
             font-weight: 600;
+            margin-left: auto;
         }
         .ml-status-badge.trained { background: rgba(34,197,94,0.2); color: #22c55e; }
         .ml-status-badge.fallback { background: rgba(234,179,8,0.2); color: #eab308; }
-        .ml-stats { font-size: 0.85em; color: #94a3b8; }
+        .ml-stats { font-size: 1.1em; color: #94a3b8; }
         
         /* ============ ML PREDICTION VIEW ============ */
         .prediction-view {
             padding: 20px;
             display: none;
+            font-size: 16.5px;
         }
         .prediction-view.active { display: block; }
-        
+        .prediction-view .section-title {
+            font-size: 1.35em;
+        }
+
+        .prediction-view .pred-summary-value {
+            font-size: 1.6em;
+        }
+
+        .prediction-view .pred-card {
+            font-size: 1.05em;
+        }
+
+        .prediction-view .pred-value {
+            font-size: 1.55em;
+        }
         .prediction-cards {
             display: flex;
             gap: 12px;
@@ -436,11 +550,48 @@
         .pred-summary-label { font-size: 0.85em; color: #94a3b8; margin-bottom: 6px; }
         .pred-summary-value { font-size: 1.5em; font-weight: bold; }
         
+        .gauges-view {
+            display: none;
+            padding: 18px;
+        }
+        .gauges-view.active {
+            display: block;
+        }   
+        /* ===== Anomaly Section chỉnh gọn ===== */
+        .anomaly-section {
+            padding-bottom: 16px;
+        }
+
+        .anomaly-section .chart-container {
+            height: 220px;          /* 👈 GIẢM từ 300px */
+            margin-top: 10px;
+        }
+
+        .anomaly-section .pred-summary {
+            margin-bottom: 12px;   /* summary sát chart hơn */
+        }
+        .anomaly-section .section-title {
+            color: #f87171;
+        }
+        /* ===== QCVN Section Title ===== */
+        .qcvn-title {
+            font-size: 1.5em;        /* TO hơn card-title thường */
+            font-weight: 700;
+            margin: 12px 0 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #e5e7eb;
+        }
+
+        
+
         /* ============ HEATMAP VIEW ============ */
         .heatmap-view {
             display: none;
             height: calc(100vh - 120px);
             position: relative;
+            font-size: 14.5px;
         }
         
         .heatmap-view.active { display: block; }
@@ -459,12 +610,20 @@
             overflow: hidden;
             z-index: 500;
             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            font-size: 14px;
         }
-        
+        .map-node-card .aqi-badge {
+            font-size: 1.35em !important;
+            padding: 6px 14px !important;
+        }
+        .map-node-card strong {
+            font-size: 1.05em;
+        }
         .map-sidebar-header {
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             padding: 15px;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 1.1em;
         }
         
         .map-sidebar-content {
@@ -476,7 +635,7 @@
         .map-node-card {
             background: rgba(255,255,255,0.05);
             border-radius: 12px;
-            padding: 15px;
+            padding: 18px;
             margin-bottom: 10px;
             cursor: pointer;
             transition: all 0.3s;
@@ -500,7 +659,7 @@
             z-index: 500;
         }
         
-        .legend-title { font-size: 0.85em; margin-bottom: 10px; font-weight: 600; }
+        .legend-title { font-size: 0.9em; margin-bottom: 10px; font-weight: 600; }
         .legend-items { display: flex; gap: 8px; }
         .legend-item { text-align: center; font-size: 0.7em; }
         .legend-color { width: 35px; height: 15px; border-radius: 3px; margin-bottom: 3px; }
@@ -513,26 +672,29 @@
             transform: translateX(-50%);
             background: rgba(26, 26, 46, 0.95);
             border-radius: 12px;
-            padding: 15px;
-            z-index: 500;
-            width: 500px;
+            padding: 26px;
+            z-index: 2000;
+            width: 600px;
         }
-        
-        .mini-chart-container { height: 120px; }
+        .map-chart-panel .legend-title {
+            font-size: 1em;
+            font-weight: 600;
+        }
+        .mini-chart-container { height: 160px; }
         
         /* Custom Marker */
         .aqi-marker {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 50px;
-            height: 50px;
+            width: 64px;
+            height: 64px;
             border-radius: 50%;
             color: white;
-            font-weight: bold;
-            font-size: 16px;
+            font-weight: 800;
+            font-size: 20px;
             box-shadow: 0 3px 10px rgba(0,0,0,0.3);
-            border: 3px solid white;
+            border: 4px solid white;
         }
         
         /* Popup */
@@ -540,6 +702,8 @@
             background: rgba(26, 26, 46, 0.95);
             color: white;
             border-radius: 12px;
+            padding: 16px 18px;
+            font-size: 15px;
         }
         .leaflet-popup-tip { background: rgba(26, 26, 46, 0.95); }
         .popup-content { padding: 10px; }
@@ -549,25 +713,34 @@
             align-items: center;
             margin-bottom: 10px;
         }
-        .popup-title { font-weight: bold; }
-        .popup-aqi { padding: 5px 12px; border-radius: 6px; font-weight: bold; }
+        .popup-title { font-weight: 700; font-size: 1.2em; }
+        .popup-aqi { padding: 6px 14px; border-radius: 6px; font-size: 1.2em; font-weight: bold; }
         .popup-status {
             padding: 8px;
             border-radius: 6px;
             text-align: center;
             margin-bottom: 10px;
-            font-size: 0.9em;
+            font-size: 1em;
+            font-weight: 600;
         }
-        .popup-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .popup-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .popup-item {
             text-align: center;
-            padding: 8px;
+            padding: 10px;
             background: rgba(255,255,255,0.1);
             border-radius: 6px;
         }
-        .popup-item-label { font-size: 0.7em; opacity: 0.7; }
+        .popup-item-label { font-size: 1.15em; opacity: 0.7; }
         .popup-item-value { font-weight: bold; }
         
+        .banner-subtitle {
+            text-align: center;
+            font-size: 1em;
+            color: #475569;
+            margin-top: 4px;
+        }
+
+
         /* Loading */
         .loading-overlay {
             position: fixed;
@@ -597,7 +770,7 @@
             .header { flex-wrap: wrap; gap: 10px; }
             .header-center { order: 3; width: 100%; justify-content: center; }
             .map-sidebar {
-                width: 100%; top: auto; bottom: 0; right: 0;
+                width: 360px; top: auto; bottom: 0; right: 0;
                 max-height: 40vh; border-radius: 16px 16px 0 0;
             }
             .map-chart-panel { display: none; }
@@ -613,13 +786,28 @@
     </div>
     
     <!-- Header -->
+    <div class="top-banner">
+        <img src="logo-iuh.png" alt="IUH Logo" class="banner-logo left">
+
+        <div class="banner-center">
+            <div class="banner-title">
+                HỆ THỐNG GIÁM SÁT Ô NHIỄM
+            </div>
+            <div class="banner-subtitle">
+                Dương Vũ Khôi Nguyên - 21093401
+            </div>
+        </div>
+
+        <img src="logo-fet.png" alt="FET IUH Logo" class="banner-logo right">
+    </div>
+
     <header class="header">
         <div class="logo">🌬️ Air Quality Monitor</div>
         
         <div class="header-center">
             <button class="view-btn" onclick="resetZoom()" id="btnResetZoom">🔍 Reset Zoom</button>
             <button class="view-btn active" onclick="switchView('dashboard')" id="btnDashboard">📊 Dashboard</button>
-            <button class="view-btn" onclick="switchView('gauges')" id="btnGauges">🚀 Chỉ số (Gauges)</button>
+            <button class="view-btn" onclick="switchView('gauges')" id="btnGauges">🚀 Gauges</button>
             <button class="view-btn" onclick="switchView('prediction')" id="btnPrediction">🔮 ML Prediction</button>
             <button class="view-btn" onclick="switchView('heatmap')" id="btnHeatmap">🗺️ Bản đồ</button>
         </div>
@@ -627,10 +815,10 @@
         <div class="header-right">
             <div class="ml-badge">
                 <div class="ml-dot" id="mlDot"></div>
-                <span id="mlStatus">ML: --</span>
+                <span id="mlStatus">Machine Learning: --</span>
             </div>
             <span class="last-update" id="lastUpdate">🕐 --:--</span>
-            <button class="refresh-btn" onclick="refreshData()">🔄 Làm mới</button>
+            <button class="refresh-btn" onclick="refreshData()">🔄 Refresh</button>
         </div>
     </header>
     
@@ -643,7 +831,7 @@
     <!-- Gauges View -->
     <div class="gauges-view" id="gaugesView">
         <div class="card">
-            <div class="card-title">📍 Node 1 - Phú Nhuận (Gauges)</div>
+            <div class="qcvn-title">📍 Node 1 - Phú Nhuận (Gauges)</div>
             <div class="gauge-row">
                 <div class="gauge-container">
                     <div class="gauge-label">PM2.5</div>
@@ -675,7 +863,7 @@
         </div>
 
         <div class="card">
-            <div class="card-title">📍 Node 2 - Quận 2 (Gauges)</div>
+            <div class="qcvn-title">📍 Node 2 - Quận 2 (Gauges)</div>
             <div class="gauge-row">
                 <div class="gauge-container">
                     <div class="gauge-label">PM2.5</div>
@@ -695,9 +883,21 @@
             </div>
         </div>
 
+        <div style="height:1px; background:rgba(255,255,255,0.1); margin:32px 0 20px;"></div>
+
 
         <div class="card">
-            <div class="card-title">📖 Ngưỡng PM theo QCVN</div>
+
+            <!-- Chú thích QCVN -->
+            <div class="qcvn-note">
+                📌 <strong>Chú thích:</strong>
+                Các ngưỡng dưới đây được áp dụng theo
+                <strong>QCVN 05:2023/BTNMT</strong>,
+                dùng để <span class="qcvn-highlight">đánh giá nhanh mức độ ô nhiễm không khí</span>
+                từ dữ liệu cảm biến PM2.5 và PM10.
+            </div>
+            
+            <div class="qcvn-title">📖 Ngưỡng PM theo QCVN</div>
             <table class="legend-table">
                 <thead>
                     <tr>
@@ -730,35 +930,36 @@
             </table>
         </div>
 
-    
+        <div style="height:1px; background:rgba(255,255,255,0.05); margin:20px 0;"></div>
+
 
         <div class="card">
-    <div class="card-title">📖 Phân loại AQI – QCVN 05:2023</div>
-    <table class="legend-table">
-        <thead>
-            <tr>
-                <th>Khoảng AQI</th>
-                <th>Tốt</th>
-                <th>Trung bình</th>
-                <th>Kém</th>
-                <th>Xấu</th>
-                <th>Rất xấu</th>
-                <th>Nguy hại</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><strong>AQI</strong></td>
-                <td style="color:#00E400">0 – 50</td>
-                <td style="color:#FFFF00">51 – 100</td>
-                <td style="color:#FF7E00">101 – 150</td>
-                <td style="color:#FF0000">151 – 200</td>
-                <td style="color:#8F3F97">&gt; 201 – 300</td>
-                <td style="color:#7E0023">&gt; 301 – 500</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+            <div class="qcvn-title">📖 Phân loại AQI – QCVN 05:2023</div>
+            <table class="legend-table">
+                <thead>
+                    <tr>
+                        <th>Khoảng AQI</th>
+                        <th>Tốt</th>
+                        <th>Trung bình</th>
+                        <th>Kém</th>
+                        <th>Xấu</th>
+                        <th>Rất xấu</th>
+                        <th>Nguy hại</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>AQI</strong></td>
+                        <td style="color:#00E400">0 – 50</td>
+                        <td style="color:#FFFF00">51 – 100</td>
+                        <td style="color:#FF7E00">101 – 150</td>
+                        <td style="color:#FF0000">151 – 200</td>
+                        <td style="color:#8F3F97">&gt; 201 – 300</td>
+                        <td style="color:#7E0023">&gt; 301 – 500</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
     </div>
 
@@ -770,7 +971,7 @@
 
         <!-- ML Models Panel -->
         <div class="comparison-section ml-panel" style="margin-bottom: 25px;">
-            <div class="section-title">🤖 ML Models Status</div>
+            <div class="section-title">🤖 Machine Learning Models Status</div>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
                 <div class="ml-model-item">
                     <div class="ml-model-header">
@@ -850,25 +1051,51 @@
     <!-- ML Prediction View -->
     <div class="prediction-view" id="predictionView">
         <div class="comparison-section">
-            <div class="section-title">🔮 Dự báo PM2.5 - 24 giờ tới</div>
-            <div class="pred-summary" id="predSummary">
+            <div class="section-title" style="display:flex;justify-content:space-between;align-items:center;">
+                <span id="predictionTitle">🔮 Dự báo PM2.5 / PM10 / AQI - 24 giờ tới</span>
+
+                <select id="mlNodeSelect"
+                        onchange="loadPrediction()"
+                        style="
+                            background:#1e293b;
+                            color:#fff;
+                            border:1px solid #334155;
+                            border-radius:8px;
+                            padding:4px 10px;
+                            font-size:13px;
+                        ">
+                    <option value="node1">Phú Nhuận</option>
+                    <option value="node2">Quận 2</option>
+                </select>
+            </div>
+            <div class="pred-summary">
+                <!-- MODEL -->
                 <div class="pred-summary-item">
                     <div class="pred-summary-label">Model</div>
-                    <div class="pred-summary-value" id="predModel">--</div>
+                    <div class="pred-summary-value" id="predModelName">
+                        LSTM-Simple
+                    </div>
                 </div>
+
+                <!-- AVG -->
                 <div class="pred-summary-item">
                     <div class="pred-summary-label">Trung bình</div>
                     <div class="pred-summary-value" id="predAvg">--</div>
                 </div>
+
+                <!-- MAX -->
                 <div class="pred-summary-item">
                     <div class="pred-summary-label">Cao nhất</div>
                     <div class="pred-summary-value" id="predMax">--</div>
                 </div>
+
+                <!-- MIN -->
                 <div class="pred-summary-item">
                     <div class="pred-summary-label">Thấp nhất</div>
                     <div class="pred-summary-value" id="predMin">--</div>
                 </div>
             </div>
+
             <div class="chart-container">
                 <canvas id="predictionChart"></canvas>
             </div>
@@ -882,9 +1109,7 @@
         <div class="comparison-section">
             <div class="section-title">🔍 Anomaly Detection - Phát hiện bất thường</div>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;" id="anomalySummary"></div>
-            <div class="chart-container">
-                <canvas id="anomalyChart"></canvas>
-            </div>
+            
         </div>
     </div>
     
@@ -1057,6 +1282,99 @@
                 }
             }
         }
+
+        function renderPredictionChart(predObjects) {
+            const ctx = document.getElementById('predictionChart').getContext('2d');
+
+            const labels = predObjects.map(p => `+${p.hour}h`);
+
+            const datasets = [
+                {
+                    label: 'PM2.5 (dự báo)',
+                    data: predObjects.map(p => p.pm2_5),
+                    borderColor: '#a855f7',
+                    backgroundColor: '#a855f720',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'PM10 (dự báo)',
+                    data: predObjects.map(p => p.pm10),
+                    borderColor: '#22c55e',
+                    backgroundColor: '#22c55e20',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'AQI (dự báo)',
+                    data: predObjects.map(p => p.aqi),
+                    borderColor: '#f97316',
+                    backgroundColor: '#f9731620',
+                    tension: 0.4,
+                    fill: false,
+                    yAxisID: 'y1'
+                }
+            ];
+
+            if (predictionChart) {
+                predictionChart.data.labels = labels;
+                predictionChart.data.datasets = datasets;
+                predictionChart.resetZoom?.();
+                predictionChart.update();
+                return;
+            }
+
+            predictionChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#fff',
+                                font: {
+                                    size: 15,        // 🔥 TO RÕ
+                                    weight: '600'
+                                },
+                                padding: 24
+                            }
+                        },
+                        zoom: {
+                            pan: { enabled: true, mode: 'x' },
+                            zoom: {
+                                wheel: { enabled: true },
+                                pinch: { enabled: true },
+                                mode: 'x'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        },
+                        y: {
+                            title: { display: true, text: 'PM (µg/m³)', color: '#fff' },
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        },
+                        y1: {
+                            position: 'right',
+                            title: { display: true, text: 'AQI', color: '#fff' },
+                            ticks: { color: '#f97316' },
+                            grid: { drawOnChartArea: false }
+                        }
+                    }
+                }
+            });
+        }
+        function resetGauges() {
+            Object.values(gaugeInstances).forEach(g => g.destroy());
+            gaugeInstances = {};
+        }
+
         // ============ CHUYỂN CHẾ ĐỘ XEM ============
         function switchView(view) {
             // 1. Ẩn tất cả các view
@@ -1082,7 +1400,7 @@
             } else if (view === 'gauges') {
                 document.getElementById('gaugesView').classList.add('active');
                 document.getElementById('btnGauges').classList.add('active');
-
+                resetGauges();
                 // ✅ BẮT BUỘC: render gauge sau khi view hiện
                 setTimeout(() => {
                     Object.keys(nodeData).forEach(nid => {
@@ -1287,10 +1605,10 @@
             const statusText = document.getElementById('mlStatus');
             if (det.is_trained) {
                 dot.className = 'ml-dot on';
-                statusText.textContent = 'ML: Active';
+                statusText.textContent = 'Machine Learning: Active';
             } else {
                 dot.className = 'ml-dot off';
-                statusText.textContent = 'ML: Training...';
+                statusText.textContent = 'Machine Learning: Training...';
             }
             
             // Dashboard panel
@@ -1329,11 +1647,11 @@
             const node1 = nodeData['node1'] || {};
             const node2 = nodeData['node2'] || {};
             const statData = [
-                `📉 AQI Node 1: <strong>${Math.round(node1.aqi || 0)}</strong>`,
+                `📉 AQI Node 1 - Phú Nhuận: <strong>${Math.round(node1.aqi || 0)}</strong>`,
                 `🌫️ PM2.5: <strong>${node1.pm2_5?.toFixed(1) || '--'}</strong> μg/m³`,
                 `☁️ PM10: <strong>${node1.pm10?.toFixed(1) || '--'}</strong> μg/m³`,
                 '',
-                `📉 AQI Node 2: <strong>${Math.round(node2.aqi || 0)}</strong>`,
+                `📉 AQI Node 2 - Quận 2: <strong>${Math.round(node2.aqi || 0)}</strong>`,
                 `🌫️ PM2.5: <strong>${node2.pm2_5?.toFixed(1) || '--'}</strong> μg/m³`,
                 `☁️ PM10: <strong>${node2.pm10?.toFixed(1) || '--'}</strong> μg/m³`,
                 '',
@@ -1535,7 +1853,17 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
-                            legend: { labels: { color: '#fff' } },
+                            legend: {
+                                labels: {
+                                    color: '#fff',
+                                    font: {
+                                        size: 14,
+                                        weight: '600'
+                                    },
+                                    padding: 20
+                                }
+                            },
+
                             zoom: {
                                 pan: { enabled: true, mode: 'x' },
                                 zoom: {
@@ -1595,7 +1923,16 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
-                            legend: { labels: { color: '#fff' } },
+                            legend: {
+                                labels: {
+                                    color: '#fff',
+                                    font: {
+                                        size: 14,
+                                        weight: '600'
+                                    },
+                                    padding: 20
+                                }
+                            },
                             zoom: {
                                 pan: { enabled: true, mode: 'x' },
                                 zoom: {
@@ -1676,118 +2013,111 @@
         // ============ ML PREDICTION ============
         async function loadPrediction() {
             try {
-                const predRes = await fetch(`${API_BASE_URL}/api/predict?node_id=node1&hours=24`);
+                const nodeId = document.getElementById('mlNodeSelect').value;
+
+                const nodeName =
+                    nodeId === 'node1' ? 'Phú Nhuận' : 'Quận 2';
+
+                // Update title
+                document.getElementById('predictionTitle').textContent =
+                    `🔮 Dự báo PM2.5 / PM10 / AQI - 24 giờ tới : ${nodeName}`;
+
+                const predRes = await fetch(
+                    `${API_BASE_URL}/api/predict?node_id=${nodeId}&hours=24`
+                );
                 predictionData = await predRes.json();
-                
-                const anomRes = await fetch(`${API_BASE_URL}/api/anomaly?node_id=node1&hours=24`);
+
+                const anomRes = await fetch(
+                    `${API_BASE_URL}/api/anomaly?node_id=${nodeId}&hours=24`
+                );
                 anomalyData = await anomRes.json();
-                
-                updatePredictionView();
+
+                updatePredictionView(nodeId);
+
             } catch (e) {
                 console.error('Error loading prediction:', e);
             }
         }
+
         
-        function updatePredictionView() {
+        function updatePredictionView(nodeId) {
             if (!predictionData || predictionData.status !== 'success') return;
             
+            document.getElementById('predModelName').textContent = 
+                predictionData.model || 'LSTM-Simple';
             const preds = predictionData.predictions || [];
+
             const predObjects = preds.map((p, i) => {
-                if (typeof p === 'number') {
-                    const aqi = calcAQI(p);
-                    return { hour: i + 1, pm2_5: p, aqi, color: getAQIColor(aqi) };
-                }
-                return { ...p, color: getAQIColor(p.aqi || calcAQI(p.pm2_5)) };
+                const pm25 = typeof p === 'number' ? p : p.pm2_5;
+
+                return {
+                    hour: i + 1,
+                    pm2_5: pm25,
+                    pm10: p.pm10 ?? (pm25 * 1.4),
+                    aqi: p.aqi ?? calcAQI(pm25),
+                    color: getAQIColor(p.aqi ?? calcAQI(pm25))
+                };
             });
-            
-            // Summary
+
+
+            // ===== SUMMARY =====
             const pm25Values = predObjects.map(p => p.pm2_5);
-            const sum = predictionData.summary || {
-                avg: pm25Values.reduce((a,b)=>a+b,0) / pm25Values.length,
-                max: Math.max(...pm25Values),
-                min: Math.min(...pm25Values)
-            };
+            const avg = pm25Values.reduce((a,b)=>a+b,0) / pm25Values.length;
+            const max = Math.max(...pm25Values);
+            const min = Math.min(...pm25Values);
+
+            document.getElementById('predAvg').textContent = avg.toFixed(1);
+            document.getElementById('predMax').textContent = max.toFixed(1);
+            document.getElementById('predMin').textContent = min.toFixed(1);
+
+            document.getElementById('predAvg').style.color = getAQIColor(calcAQI(avg));
+            document.getElementById('predMax').style.color = getAQIColor(calcAQI(max));
+            document.getElementById('predMin').style.color = getAQIColor(calcAQI(min));
             
-            document.getElementById('predModel').textContent = predictionData.model || 'LSTM';
-            document.getElementById('predAvg').textContent = sum.avg?.toFixed(1) || '--';
-            document.getElementById('predAvg').style.color = getAQIColor(calcAQI(sum.avg));
-            document.getElementById('predMax').textContent = sum.max?.toFixed(1) || '--';
-            document.getElementById('predMax').style.color = getAQIColor(calcAQI(sum.max));
-            document.getElementById('predMin').textContent = sum.min?.toFixed(1) || '--';
-            document.getElementById('predMin').style.color = getAQIColor(calcAQI(sum.min));
-            
-            // Prediction cards
-            document.getElementById('predictionCards').innerHTML = predObjects.map(p => {
-                const aqi = p.aqi || calcAQI(p.pm2_5);
-                const color = p.color || getAQIColor(aqi);
-                return `
-                    <div class="pred-card">
-                        <div class="pred-time">+${p.hour}h</div>
-                        <div class="pred-value" style="color: ${color}">${p.pm2_5.toFixed(1)}</div>
-                        <div class="pred-aqi" style="background: ${color}; color: ${aqi <= 100 ? '#000' : '#fff'}">
-                            AQI ${Math.round(aqi)}
-                        </div>
+            renderPredictionChart(predObjects);
+            // ===== CARDS =====
+            document.getElementById('predictionCards').innerHTML = predObjects.map(p => `
+                <div class="pred-card">
+                    <div class="pred-time">+${p.hour}h</div>
+                    <div class="pred-value" style="color:${p.color}">
+                        ${p.pm2_5.toFixed(1)}
                     </div>
-                `;
-            }).join('');
-            
-            // Prediction chart
-            const ctx = document.getElementById('predictionChart').getContext('2d');
-            if (predictionChart) predictionChart.destroy();
-            
-            predictionChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: predObjects.map(p => `+${p.hour}h`),
-                    datasets: [{
-                        label: 'PM2.5 Dự báo',
-                        data: predObjects.map(p => p.pm2_5),
-                        borderColor: '#a855f7',
-                        backgroundColor: 'rgba(168,85,247,0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: predObjects.map(p => p.color)
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { labels: { color: '#fff' } },
-                        zoom: {
-                            pan: { enabled: true, mode: 'x' },
-                            zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
-                        }
-                    },
-                    scales: {
-                        x: { ticks: { color: '#888' }, grid: { color: 'rgba(255,255,255,0.1)' } },
-                        y: { min: 0, ticks: { color: '#888' }, grid: { color: 'rgba(255,255,255,0.1)' } }
-                    }
-                }
-            });
-            
-            // Anomaly section
+                    <div style="font-size:0.75em;color:#94a3b8">
+                        PM10: ${p.pm10.toFixed(1)}
+                    </div>
+                    <div class="pred-aqi" style="background:${p.color};color:${p.aqi<=100?'#000':'#fff'}">
+                        AQI ${Math.round(p.aqi)}
+                    </div>
+                </div>
+            `).join('');
+
+            // ===== ANOMALY =====
             if (anomalyData?.status === 'success') {
                 document.getElementById('anomalySummary').innerHTML = `
-                    <div class="pred-summary-item">
-                        <div class="pred-summary-label">Model</div>
-                        <div class="pred-summary-value" style="font-size: 1em;">${anomalyData.model || 'IF'}</div>
-                    </div>
-                    <div class="pred-summary-item">
-                        <div class="pred-summary-label">Total Points</div>
-                        <div class="pred-summary-value">${anomalyData.total_points}</div>
-                    </div>
-                    <div class="pred-summary-item">
-                        <div class="pred-summary-label">Anomalies</div>
-                        <div class="pred-summary-value" style="color: ${anomalyData.anomaly_count > 0 ? '#ef4444' : '#22c55e'}">${anomalyData.anomaly_count}</div>
-                    </div>
-                    <div class="pred-summary-item">
-                        <div class="pred-summary-label">Rate</div>
-                        <div class="pred-summary-value">${anomalyData.anomaly_rate}%</div>
+                    <div class="pred-summary">
+                        <div class="pred-summary-item">
+                            <div class="pred-summary-label">Model</div>
+                            <div class="pred-summary-value">${anomalyData.model || 'IF'}</div>
+                        </div>
+                        <div class="pred-summary-item">
+                            <div class="pred-summary-label">Total</div>
+                            <div class="pred-summary-value">${anomalyData.total_points}</div>
+                        </div>
+                        <div class="pred-summary-item">
+                            <div class="pred-summary-label">Anomalies</div>
+                            <div class="pred-summary-value" style="color:${anomalyData.anomaly_count>0?'#ef4444':'#22c55e'}">
+                                ${anomalyData.anomaly_count}
+                            </div>
+                        </div>
+                        <div class="pred-summary-item">
+                            <div class="pred-summary-label">Rate</div>
+                            <div class="pred-summary-value">${anomalyData.anomaly_rate}%</div>
+                        </div>
                     </div>
                 `;
             }
         }
+
         
         function changeTimeRange(hours, event) {
             currentTimeRange = hours;
