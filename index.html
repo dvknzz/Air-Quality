@@ -93,7 +93,14 @@
         #gaugesView.active {
             display: block;
         }
-        
+        #app-scale {
+            zoom: 0.7;              /* Chrome, Edge – OK */
+        }
+        #heatmapView,
+        #map {
+            zoom: 0.93 !important;
+            transform: none !important;
+        }
         .qcvn-note {
             margin-top: 30px;          /* ⬅️ Cách xa gauges phía trên */
             margin-bottom: 12px;       /* ⬅️ Cách bảng QCVN bên dưới */
@@ -659,7 +666,7 @@
             z-index: 500;
         }
         
-        .legend-title { font-size: 0.9em; margin-bottom: 10px; font-weight: 600; }
+        .legend-title { font-size: 0.9em; margin-bottom: 10px; font-weight: 600; text-align: center;}
         .legend-items { display: flex; gap: 8px; }
         .legend-item { text-align: center; font-size: 0.7em; }
         .legend-color { width: 35px; height: 15px; border-radius: 3px; margin-bottom: 3px; }
@@ -672,15 +679,16 @@
             transform: translateX(-50%);
             background: rgba(26, 26, 46, 0.95);
             border-radius: 12px;
-            padding: 26px;
-            z-index: 2000;
-            width: 600px;
+            padding: 10px;
+            z-index: 1000;
+            width: 500px;
         }
         .map-chart-panel .legend-title {
-            font-size: 1em;
-            font-weight: 600;
+            font-size: 0.9em;
+            font-weight: 500;
+            text-align: center;
         }
-        .mini-chart-container { height: 160px; }
+        .mini-chart-container { height: 130px; }
         
         /* Custom Marker */
         .aqi-marker {
@@ -779,6 +787,7 @@
     </style>
 </head>
 <body>
+    <div id="app-scale">
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loading">
         <div class="spinner"></div>
@@ -1112,7 +1121,7 @@
             
         </div>
     </div>
-    
+    </div>
     <!-- Heatmap View -->
     <div class="heatmap-view" id="heatmapView">
         <div id="map"></div>
@@ -2267,5 +2276,6 @@
             }, 30000);
         });
     </script>
+    </div>
 </body>
 </html>
