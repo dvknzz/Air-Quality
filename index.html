@@ -635,7 +635,7 @@
         
         .map-sidebar-content {
             padding: 15px;
-            max-height: 400px;
+            max-height: 480px;
             overflow-y: auto;
         }
         
@@ -892,6 +892,27 @@
             </div>
         </div>
 
+        <div class="card">
+            <div class="qcvn-title">📍 Node 3 - Quận 1 (Gauges)</div>
+            <div class="gauge-row">
+                <div class="gauge-container">
+                    <div class="gauge-label">PM2.5</div>
+                    <div class="gauge-canvas-box"><canvas id="g_n2_pm25"></canvas><div class="gauge-value" id="v_n2_pm25">--</div></div>
+                    <div class="gauge-unit">µg/m³</div>
+                </div>
+                <div class="gauge-container">
+                    <div class="gauge-label">PM10</div>
+                    <div class="gauge-canvas-box"><canvas id="g_n2_pm10"></canvas><div class="gauge-value" id="v_n2_pm10">--</div></div>
+                    <div class="gauge-unit">µg/m³</div>
+                </div>
+                <div class="gauge-container">
+                    <div class="gauge-label">AQI</div>
+                    <div class="gauge-canvas-box"><canvas id="g_n2_aqi"></canvas><div class="gauge-value" id="v_n2_aqi">--</div></div>
+                    <div class="gauge-unit">VN_AQI</div>
+                </div>
+            </div>
+        </div>
+
         <div style="height:1px; background:rgba(255,255,255,0.1); margin:32px 0 20px;"></div>
 
 
@@ -1075,6 +1096,7 @@
                         ">
                     <option value="node1">Phú Nhuận</option>
                     <option value="node2">Quận 2</option>
+                    <option value="node3">Quận 1</option>
                 </select>
             </div>
             <div class="pred-summary">
@@ -1171,11 +1193,12 @@
     
     <script>
         // ============ CẤU HÌNH ============
-        const API_BASE_URL = 'https://every-assign-complicated-avi.trycloudflare.com';
+        const API_BASE_URL = 'https://match-conducting-exotic-buffer.trycloudflare.com/';
         
         const NODES = [
-            { id: 'node1', name: 'Node 1 - Phú Nhuận', lat: 10.798203747741315, lng: 106.68344878033395, address: 'Phú Nhuận, TP.HCM' },
-            { id: 'node2', name: 'Node 2 - Quận 2', lat: 10.77942054268699, lng: 106.75200759476627, address: 'Thủ Đức, TP.HCM' }
+            { id: 'node1', name: 'Node 1 - Phú Nhuận', lat: 10.798203747741315, lng: 106.68344878033395, address: 'Phú Nhuận, TP.HCM (Mật độ cao)' },
+            { id: 'node2', name: 'Node 2 - Quận 2', lat: 10.77942054268699, lng: 106.75200759476627, address: 'Thủ Đức, TP.HCM (Mật độ trung bình)' },
+            { id: 'node3', name: 'Node 3 - Quận 1', lat: 10.78805441869419, lng: 106.6993391337347, address: 'Quận 1, TP.HCM (Mật độ thấp)' }
         ];
         
         // ============ BIẾN TOÀN CỤC ============
@@ -1655,6 +1678,7 @@
             // Today stats
             const node1 = nodeData['node1'] || {};
             const node2 = nodeData['node2'] || {};
+            const node3 = nodeData['node3'] || {};
             const statData = [
                 `📉 AQI Node 1 - Phú Nhuận: <strong>${Math.round(node1.aqi || 0)}</strong>`,
                 `🌫️ PM2.5: <strong>${node1.pm2_5?.toFixed(1) || '--'}</strong> μg/m³`,
@@ -1663,6 +1687,10 @@
                 `📉 AQI Node 2 - Quận 2: <strong>${Math.round(node2.aqi || 0)}</strong>`,
                 `🌫️ PM2.5: <strong>${node2.pm2_5?.toFixed(1) || '--'}</strong> μg/m³`,
                 `☁️ PM10: <strong>${node2.pm10?.toFixed(1) || '--'}</strong> μg/m³`,
+                '',
+                `📉 AQI Node 3 - Quận 1: <strong>${Math.round(node3.aqi || 0)}</strong>`,
+                `🌫️ PM2.5: <strong>${node3.pm2_5?.toFixed(1) || '--'}</strong> μg/m³`,
+                `☁️ PM10: <strong>${node3.pm10?.toFixed(1) || '--'}</strong> μg/m³`,
                 '',
                 `📏 Tiêu chuẩn: <strong>QCVN 05:2023</strong>`
             ];
@@ -2024,8 +2052,11 @@
             try {
                 const nodeId = document.getElementById('mlNodeSelect').value;
 
-                const nodeName =
-                    nodeId === 'node1' ? 'Phú Nhuận' : 'Quận 2';
+                const nodeName = {
+                    node1: 'Phú Nhuận',
+                    node2: 'Quận 2',
+                    node3: 'Quận 1'
+                }[nodeId] || nodeId;
 
                 // Update title
                 document.getElementById('predictionTitle').textContent =
