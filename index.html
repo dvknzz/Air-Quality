@@ -893,25 +893,36 @@
         </div>
 
         <div class="card">
-            <div class="qcvn-title">📍 Node 3 - Quận 1 (Gauges)</div>
-            <div class="gauge-row">
-                <div class="gauge-container">
-                    <div class="gauge-label">PM2.5</div>
-                    <div class="gauge-canvas-box"><canvas id="g_n2_pm25"></canvas><div class="gauge-value" id="v_n2_pm25">--</div></div>
-                    <div class="gauge-unit">µg/m³</div>
-                </div>
-                <div class="gauge-container">
-                    <div class="gauge-label">PM10</div>
-                    <div class="gauge-canvas-box"><canvas id="g_n2_pm10"></canvas><div class="gauge-value" id="v_n2_pm10">--</div></div>
-                    <div class="gauge-unit">µg/m³</div>
-                </div>
-                <div class="gauge-container">
-                    <div class="gauge-label">AQI</div>
-                    <div class="gauge-canvas-box"><canvas id="g_n2_aqi"></canvas><div class="gauge-value" id="v_n2_aqi">--</div></div>
-                    <div class="gauge-unit">VN_AQI</div>
-                </div>
+    <div class="qcvn-title">📍 Node 3 - Quận 1 (Gauges)</div>
+    <div class="gauge-row">
+        <div class="gauge-container">
+            <div class="gauge-label">PM2.5</div>
+            <div class="gauge-canvas-box">
+                <canvas id="g_n3_pm25"></canvas>
+                <div class="gauge-value" id="v_n3_pm25">--</div>
             </div>
+            <div class="gauge-unit">µg/m³</div>
         </div>
+
+        <div class="gauge-container">
+            <div class="gauge-label">PM10</div>
+            <div class="gauge-canvas-box">
+                <canvas id="g_n3_pm10"></canvas>
+                <div class="gauge-value" id="v_n3_pm10">--</div>
+            </div>
+            <div class="gauge-unit">µg/m³</div>
+        </div>
+
+        <div class="gauge-container">
+            <div class="gauge-label">AQI</div>
+            <div class="gauge-canvas-box">
+                <canvas id="g_n3_aqi"></canvas>
+                <div class="gauge-value" id="v_n3_aqi">--</div>
+            </div>
+            <div class="gauge-unit">VN_AQI</div>
+        </div>
+    </div>
+</div>
 
         <div style="height:1px; background:rgba(255,255,255,0.1); margin:32px 0 20px;"></div>
 
@@ -1287,12 +1298,12 @@
         // Hàm cập nhật số liệu cho đồng hồ
         function updateGauges(nid, data) {
             // Mapping ID canvas với dữ liệu thực tế
+            const short = nid === 'node1' ? 'n1' : nid === 'node2' ? 'n2' : 'n3';
             const map = {
-                [`g_${nid=='node1'?'n1':'n2'}_pm25`]: {val: data.pm2_5, max: 150, type: 'pm25'},
-                [`g_${nid=='node1'?'n1':'n2'}_pm10`]: {val: data.pm10, max: 300, type: 'pm10'},
-                [`g_${nid=='node1'?'n1':'n2'}_aqi`]: {val: data.aqi, max: 300, type: 'aqi'}
+                [`g_${short}_pm25`]: { val: data.pm2_5, max: 150, type: 'pm25' },
+                [`g_${short}_pm10`]: { val: data.pm10, max: 300, type: 'pm10' },
+                [`g_${short}_aqi`]: { val: data.aqi, max: 300, type: 'aqi' }
             };
-
             for (let [id, info] of Object.entries(map)) {
                 // Nếu chưa có biểu đồ thì tạo mới
                 if (!gaugeInstances[id]) gaugeInstances[id] = initGauge(id, info.max);
